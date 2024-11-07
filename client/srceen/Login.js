@@ -5,7 +5,7 @@ import Feather from '@expo/vector-icons/Feather';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Entypo from '@expo/vector-icons/Entypo';
 import { TouchableOpacity } from 'react-native';
-const Login = () => {
+const Login = ({navigation}) => {
   return (
     <ScrollView style={{ backgroundColor: 'white' }}>
       <View style={{ flexDirection: 'row', justifyContent: 'center', marginVertical: 100 }}>
@@ -51,7 +51,8 @@ const Login = () => {
       </View>
       <View style={{ justifyContent: 'center', flexDirection: 'row', marginTop: 30 }}>
         <Text style={{ fontSize: 15 }}>Don't have an account?</Text>
-        <TouchableOpacity><Text style={{ marginLeft: 5, fontSize: 15, color: '#41cee0', fontWeight: 'bold' }}>Sign up</Text></TouchableOpacity>
+        <TouchableOpacity><Text style={{ marginLeft: 5, fontSize: 15, color: '#41cee0', fontWeight: 'bold' }}
+          onPress={() => { navigation.navigate('Register') }}>Register</Text></TouchableOpacity>
       </View>
     </ScrollView>
 

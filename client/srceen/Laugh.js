@@ -15,7 +15,7 @@ const Laugh = ({navigation}) => {
                 </Text>
             </View>
             <TouchableOpacity style={{backgroundColor:'white',borderRadius:20,marginHorizontal:30,paddingVertical:10,alignItems:'center'}}
-            onPress={()=>navigation.navigate('Home')}>
+            onPress={()=>navigation.navigate('Login')}>
                 <Text style={{fontSize:20}}>Continue</Text>
             </TouchableOpacity>
         </ScrollView>
