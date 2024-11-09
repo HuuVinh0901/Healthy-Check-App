@@ -1,4 +1,3 @@
-import React from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity, ScrollView } from 'react-native';
 import { Circle, Svg } from 'react-native-svg';
 import { LineChart } from 'react-native-chart-kit';
@@ -6,27 +5,66 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useState, useEffect } from 'react';
 const StepTrackerScreen = ({navigation}) => {
+    const [user, setUser] = useState(null);
+    const [steps, setSteps] = useState(0);
+    useEffect(() => {
+        const getUserData = async () => {
+          try {
+            const currentUser = await AsyncStorage.getItem('currentUser');
+            if (currentUser) {
+              const parsedUser = JSON.parse(currentUser);
+              setUser(parsedUser);
+               console.log("Data của step:"+parsedUser.id)
+               fetchSteps(parsedUser.id)
+            }
+          } catch (error) {
+            console.error('Error fetching user data', error);
+          }
+        };
+      
+        getUserData();
+      }, []);
+      const fetchSteps = async (userId) => {
+        try {
+            const today = new Date().toISOString().split('T')[0]; 
+            console.log(today)// Lấy ngày hiện tại theo định dạng YYYY-MM-DD
+            const response = await fetch(`http://localhost:3000/api/steps/${userId}/${today}`); // Thay bằng URL đúng của bạn
+            const data = await response.json();
+            console.log("Dữ liệu từ API:", data); // Kiểm tra dữ liệu trả về
+            if (data && data.steps) {
+                setSteps(data.steps);  // Cập nhật state với số bước
+            } else {
+                console.log("Không có dữ liệu bước đi");
+            }
+        } catch (error) {
+            console.error('Lỗi khi gọi API:', error);
+        } finally {
+            setLoading(false); // Đảm bảo set loading false khi kết thúc
+        }
+    };
     const radius = 50;
     const strokeWidth = 10;
     const circumference = 2 * Math.PI * radius;
     //step
-    const steps = 11857;
+    // const steps = 11857;
     const goalStep = 18000;
     const progressStep = (steps / goalStep) * 100;
     const progressOffsetStep = circumference - (progressStep / 100) * circumference;
     //calo
-    const kcal = 850;
+    const kcal = steps*0.05; //Mỗi bước chân tiêu thụ 0.05kcal
     const goalKcal = 1700;
     const progressKcal = (kcal / goalKcal) * 100;
     const progressOffsetKcal = circumference - (progressKcal / 100) * circumference;
     //km
-    const km = 5;
+    const km = (steps*0.5)/1000;
     const goalKm = 20;
     const progressKm = (km / goalKm) * 100;
     const progressOffsetKm = circumference - (progressKm / 100) * circumference;
     //TIme
-    const time = 120;
+    const time = (km/5)*60;
     const goalTime = 200;
     const progressTime = (time / goalTime) * 100;
     const progressOffsetTime = circumference - (progressTime / 100) * circumference;
@@ -51,7 +89,7 @@ const StepTrackerScreen = ({navigation}) => {
                         <Text style={styles.subtitle}>You have achieved</Text>
                     </View>
                     <View style={{ flexDirection: 'row' }}>
-                        <Text style={styles.highlight}>{Math.round(progressOffsetStep)}%</Text>
+                        <Text style={styles.highlight}>{Math.round(progressStep)}%</Text>
                         <Text style={styles.subtitle}>of your goal today</Text>
                     </View>
 
@@ -78,6 +116,7 @@ const StepTrackerScreen = ({navigation}) => {
                             strokeDasharray={circumference}
                             strokeDashoffset={progressOffsetStep}
                             strokeLinecap="round"
+                            transform="rotate(-90, 60, 60)"
                         />
                     </Svg>
                     <View style={styles.innerCircle}>

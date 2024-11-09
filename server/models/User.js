@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs');
 const { DataTypes } = require('sequelize');
 const sequelize = require('../sequelize'); 
 
@@ -12,6 +13,10 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
   gender: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -19,12 +24,24 @@ const User = sequelize.define('User', {
   avatar: {
     type: DataTypes.STRING,
     allowNull: true,
+  },
+  email: {
+    type: DataTypes.STRING,
+    allowNull: true,
   }
 }, {
   tableName: 'users', 
-  timestamps: true,   
+  timestamps: true, 
+  hooks: {
+    beforeCreate: async (user) => {
+      
+      if (user.password) {
+        const salt = await bcrypt.genSalt(10); 
+        user.password = await bcrypt.hash(user.password, salt); 
+      }
+    }
+  }
 });
-
 
 sequelize.sync()
   .then(() => console.log('Database & tables created!'))

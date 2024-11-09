@@ -1,13 +1,31 @@
-import { View, Text, Image, ScrollView } from 'react-native'
-import React from 'react'
+import { View, Text, Image, ScrollView,TouchableOpacity } from 'react-native'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Entypo from '@expo/vector-icons/Entypo';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Feather from '@expo/vector-icons/Feather';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { TouchableOpacity } from 'react-native';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useState, useEffect } from 'react';
 const Home = ({navigation}) => {
+    const [user, setUser] = useState(null);
+    useEffect(() => {
+        const getUserData = async () => {
+          try {
+            const currentUser = await AsyncStorage.getItem('currentUser');
+            if (currentUser) {
+              const parsedUser = JSON.parse(currentUser);
+              setUser(parsedUser);
+               
+            }
+          } catch (error) {
+            console.error('Error fetching user data', error);
+          }
+        };
+      
+        getUserData();
+      }, []);
     return (
         <View style={{ flex:1,backgroundColor: '#fafafb' ,justifyContent: 'space-between',}}>
 

@@ -1,10 +1,13 @@
 const express = require('express');
-const userController = require('./controllers/UserController'); 
-
+const cors = require('cors');
 const app = express();
+const routes = require('./routes/routes');
+// Enable CORS
+app.use(cors());
+
 app.use(express.json());
 
-app.post('/api/users', userController.addUser); 
+app.use('/api',routes); 
 
 const PORT = 3000;
 app.listen(PORT, () => {
