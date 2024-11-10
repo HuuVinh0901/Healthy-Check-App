@@ -42,7 +42,7 @@ const StepTrackerScreen = ({navigation}) => {
         } catch (error) {
             console.error('Lỗi khi gọi API:', error);
         } finally {
-            setLoading(false); // Đảm bảo set loading false khi kết thúc
+            
         }
     };
     const radius = 50;

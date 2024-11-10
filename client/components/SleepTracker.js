@@ -5,68 +5,112 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-const SleepTracker = ({navigation}) => {
-    const duLieuGiacNgu = [
-        { gioBatDau: "22:00", gioThucDay: "06:30", ngayDiNgu: "2024-11-04" },
-        { gioBatDau: "23:00", gioThucDay: "07:00", ngayDiNgu: "2024-11-05" },
-        { gioBatDau: "22:30", gioThucDay: "06:00", ngayDiNgu: "2024-11-06" },
-        { gioBatDau: "00:00", gioThucDay: "08:00", ngayDiNgu: "2024-11-07" },
-        { gioBatDau: "23:00", gioThucDay: "07:00", ngayDiNgu: "2024-11-08" },
-        { gioBatDau: "22:30", gioThucDay: "06:00", ngayDiNgu: "2024-11-09" },
-        { gioBatDau: "00:00", gioThucDay: "08:00", ngayDiNgu: "2024-11-10" },
-    ];
-
-    const [trungBinhGiacNgu, setTrungBinhGiacNgu] = useState("0h 0 min");
-    const [tiLe, setTiLe] = useState("0%");
+import moment from 'moment';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+const SleepTracker = ({ navigation }) => {
+    const [sleepData, setSleepData] = useState([]);
+    const [averageSleepTime, setAverageSleepTime] = useState("0h 0 min");
+    const [sleepRate, setSleepRate] = useState("0%");
+    const [user, setUser] = useState(null);
     useEffect(() => {
-        tinhToanThongKe();
-
-
+        getUserData();
     }, []);
 
-    const tinhToanThongKe = () => {
-        const thoiGianNgu = duLieuGiacNgu.map(record => tinhThoiGianNgu(record));
-        const tongThoiGianNgu = thoiGianNgu.reduce((sum, time) => sum + time, 0);
-
-        // Lấy số ngày từ dữ liệu
-        const soNgay = duLieuGiacNgu.length;
-
-        // Tính giờ và phút
-        const trungBinh = tongThoiGianNgu / soNgay; // Chia cho số ngày
-        const soGio = Math.floor(trungBinh / 60);
-        const soPhut = Math.round(trungBinh % 60); // Làm tròn số phút
-
-        const thoiGianChuan = 540 * soNgay; // phút
-        const sleepRate = Math.min((tongThoiGianNgu / thoiGianChuan) * 100, 100);
-        const sleepRateOver = Math.round(sleepRate);
-        // Cập nhật trạng thái
-        setTrungBinhGiacNgu(`${soGio}h ${soPhut} min`);
-        setTiLe(`${sleepRateOver}%`)
-    };
-
-
-
-
-    const tinhThoiGianNgu = ({ gioBatDau, gioThucDay, ngayDiNgu }) => {
-        const startTime = new Date(`${ngayDiNgu}T${gioBatDau}:00`);
-        const endTime = new Date(`${ngayDiNgu}T${gioThucDay}:00`);
-
-        // Nếu giờ thức dậy nhỏ hơn giờ đi ngủ, tăng thêm một ngày
-        if (endTime < startTime) {
-            endTime.setDate(endTime.getDate() + 1);
+    const getUserData = async () => {
+        try {
+            const currentUser = await AsyncStorage.getItem('currentUser');
+            if (currentUser) {
+                const parsedUser = JSON.parse(currentUser);
+                setUser(parsedUser);
+                console.log("Data của step:" + parsedUser.id)
+                fetchSleepData(parsedUser.id)
+            }
+        } catch (error) {
+            console.error('Error fetching user data', error);
         }
-
-        // Tính toán thời gian ngủ bằng miligiây và chuyển đổi sang phút
-        return (endTime - startTime) / (1000 * 60);
     };
 
+    const fetchSleepData = async (userId) => {
+        try {
+            const response = await fetch(`http://localhost:3000/api/sleeps/${userId}`);
+            const data = await response.json();
+            setSleepData(data || []);
+            calculateStatistics(data || []);
+            console.log(data)
+        } catch (error) {
+            console.error('Lỗi khi gọi API:', error);
+        }
+    };
 
+    const calculateStatistics = (sleepData) => {
+        const sleepDurations = sleepData.map(record =>
+            calculateSleepDuration(record.bedTime, record.wakeUp, record.date)
+        );
+
+        const totalSleep = sleepDurations.reduce((sum, time) => sum + time, 0);
+        const days = sleepData.length;
+        const averageSleep = totalSleep / days;
+
+        const hours = Math.floor(averageSleep / 60);
+        const minutes = Math.round(averageSleep % 60);
+
+        const standardSleep = 540 * days;
+        const sleepRate = Math.min((totalSleep / standardSleep) * 100, 100);
+
+        setAverageSleepTime(`${hours}h ${minutes} min`);
+        setSleepRate(`${Math.round(sleepRate)}%`);
+    };
+
+    const calculateSleepDuration = (bedTime, wakeUp, date) => {
+        console.log(`bedTime: ${bedTime}, wakeUp: ${wakeUp}, date: ${date}`);  // Log để kiểm tra dữ liệu đầu vào
+    
+        const startTime = new Date(`${date}T${bedTime}:00`);
+        let endTime = new Date(`${date}T${wakeUp}:00`);
+    
+        // Kiểm tra xem endTime có nhỏ hơn startTime không, nếu có thì điều chỉnh
+        if (endTime <= startTime) {
+            endTime.setDate(endTime.getDate() + 1);  // Nếu giờ thức dậy nhỏ hơn giờ đi ngủ, thêm một ngày vào endTime
+        }
+    
+        console.log(`startTime: ${startTime}, endTime: ${endTime}`);  // Log thời gian bắt đầu và kết thúc
+    
+        const sleepDuration = (endTime - startTime) / (1000 * 60); // Chuyển từ milliseconds sang phút
+        console.log(`sleepDuration: ${sleepDuration} phút`);  // Log kết quả thời gian ngủ
+    
+        return sleepDuration;
+    };
+    
+
+    // Xác định ngày trong tuần
     const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-    const data = duLieuGiacNgu.map((record, index) => {
-        const thoiGianNguThucTe = tinhThoiGianNgu(record) / 60;
-        const thoiGianNen = 9; // Tổng thời gian cột nền (10 giờ)
-        return { x: labels[index], thucTe: thoiGianNguThucTe, nen: thoiGianNen };
+    const today = moment();
+    const startOfWeek = today.clone().startOf('isoWeek');
+    const currentDayIndex = today.isoWeekday() - 1;
+
+    const chartData = labels.map((label, index) => {
+        const currentDate = startOfWeek.clone().add(index, 'days').format("YYYY-MM-DD");
+        // Sử dụng moment để so sánh ngày chính xác
+        const sleepRecord = sleepData.find(record => moment(record.date).isSame(moment(currentDate), 'day'));
+    
+        console.log(`Ngày: ${label}, currentDate: ${currentDate}, sleepRecord.date: ${sleepRecord ? sleepRecord.date : 'Không có dữ liệu'}`);
+    
+        const sleepHours = sleepRecord ? calculateSleepDuration(sleepRecord.bedTime, sleepRecord.wakeUp, sleepRecord.date) / 60 : 0;
+    
+        console.log(`Số giờ ngủ thực tế: ${sleepHours}`);
+    
+        const maxSleepHours = 9;
+        const isToday = index === currentDayIndex;
+    
+        return {
+            x: label,
+            actual: sleepHours,
+            max: maxSleepHours,
+            isToday,
+        };
     });
+    
+    
+    
 
     return (
         <View style={styles.container}>
@@ -84,7 +128,7 @@ const SleepTracker = ({navigation}) => {
                 <Text style={styles.title}>Your average time of</Text>
                 <View style={{ flexDirection: 'row', marginVertical: 5, justifyContent: 'center', alignItems: 'center' }}>
                     <Text style={styles.title}>sleep a day is</Text>
-                    <Text style={styles.averageSleep}>{trungBinhGiacNgu}</Text>
+                    <Text style={styles.averageSleep}>{averageSleepTime}</Text>
                 </View>
 
             </View>
@@ -94,27 +138,27 @@ const SleepTracker = ({navigation}) => {
             }}>
                 <Svg height="250" width="400">
                     <G y={50}>
-                        {data.map((d, index) => (
+                        {chartData.map((d, index) => (
                             <React.Fragment key={index}>
                                 {/* Cột nền */}
                                 <Rect
-                                    x={index * 50 + 30} // Thay đổi vị trí cột
-                                    y={150 - d.nen * 15} // Điều chỉnh chiều cao cột
+                                    x={index * 50 + 30}
+                                    y={150 - d.max * 15}
                                     width="40"
-                                    height={d.nen * 15}
+                                    height={d.max * 15}
                                     fill="#f3f4f6"
-                                    rx="10" // Bo góc cột nền
-                                    ry="10" // Bo góc cột nền
+                                    rx="10"
+                                    ry="10"
                                 />
                                 {/* Cột thực tế */}
                                 <Rect
                                     x={index * 50 + 30}
-                                    y={150 - d.thucTe * 15}
+                                    y={150 - d.actual * 15}
                                     width="40"
-                                    height={d.thucTe * 15}
-                                    fill="#a6f5ff"
-                                    rx="10" // Bo góc cột thực tế
-                                    ry="10" // Bo góc cột thực tế
+                                    height={d.actual * 15}
+                                    fill={d.isToday ? "#1ce5ff" : "#a6f5ff"}
+                                    rx="10"
+                                    ry="10"
                                 />
                                 {/* Nhãn cho các cột */}
                                 <SvgText
@@ -139,7 +183,7 @@ const SleepTracker = ({navigation}) => {
                     </View>
                     <View style={{ alignItems: 'center' }}>
 
-                        <Text style={{ fontSize: 15, fontWeight: 'bold' }}>{tiLe}</Text>
+                        <Text style={{ fontSize: 15, fontWeight: 'bold' }}>{sleepRate}</Text>
                     </View>
                 </TouchableOpacity>
                 <TouchableOpacity style={{ width: '49%', alignItems: 'center', borderRadius: 20, borderWidth: 2, borderColor: '#f6f6f7', paddingVertical: 10 }}>
@@ -169,10 +213,10 @@ const SleepTracker = ({navigation}) => {
                         <Text style={{ fontSize: 20, color: 'white' }}>pm</Text>
                     </View>
                 </TouchableOpacity>
-                <TouchableOpacity style={{ paddingLeft:10,width: '49%', borderRadius: 20, paddingVertical: 5, backgroundColor: '#ed7d2d' }}>
+                <TouchableOpacity style={{ paddingLeft: 10, width: '49%', borderRadius: 20, paddingVertical: 5, backgroundColor: '#ed7d2d' }}>
                     <View style={{ paddingVertical: 5, flexDirection: 'row', alignItems: 'center' }}>
                         <Ionicons name="notifications-outline" size={24} color="white" />
-                        <Text style={{ marginLeft: 5,color:'white' }}>Wake up</Text>
+                        <Text style={{ marginLeft: 5, color: 'white' }}>Wake up</Text>
                     </View>
                     <View style={{ flexDirection: 'row', gap: 5 }}>
 

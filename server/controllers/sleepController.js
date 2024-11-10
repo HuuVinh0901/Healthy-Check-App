@@ -15,7 +15,7 @@ const createSleep = async (req, res) => {
 const getSleep = async (req, res) => {
   try {
     const sleep = await Sleep.findAll({
-      where: { userId: req.params.userId, date: req.params.date }
+      where: { userId: req.params.userId}
     });
     if (sleep.length === 0) {
       return res.status(404).json({ message: 'No sleep data found' });

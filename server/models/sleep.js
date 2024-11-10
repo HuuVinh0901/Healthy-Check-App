@@ -10,11 +10,11 @@ const Sleep = sequelize.define('Sleep', {
     allowNull: false,
   },
   bedTime: {
-    type: DataTypes.TIME,  
+    type: DataTypes.STRING,  
     allowNull: false,
   },
   wakeUp: {
-    type: DataTypes.TIME, 
+    type: DataTypes.STRING, 
     allowNull: false,
   },
   date: {

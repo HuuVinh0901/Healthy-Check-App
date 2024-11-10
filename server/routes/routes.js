@@ -17,7 +17,7 @@ router.get('/steps/:userId/:date', stepController.getStepsByUser);
 
 // Routes cho Sleep
 router.post('/sleeps', sleepController.createSleep);
-router.get('/sleeps/:userId/:date', sleepController.getSleep);
+router.get('/sleeps/:userId/', sleepController.getSleep);
 
 // Routes cho Nutrition
 router.post('/nutritions', nutritionController.createNutrition);
