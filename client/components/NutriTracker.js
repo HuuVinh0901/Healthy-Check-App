@@ -1,23 +1,59 @@
-import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Circle, Svg } from 'react-native-svg';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Entypo from '@expo/vector-icons/Entypo';
-const NutritionTracker = ({navigation}) => {
-    const data = [
-        {
-            userId: 1, fat: 70, protein: 150, carb: 220
-        }
-    ];
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useState, useEffect } from 'react';
+const NutritionTracker = ({ navigation }) => {
 
-    // Lấy thông tin của người dùng đầu tiên
-    const { fat, protein, carb } = data[0]; // Dùng destructuring để lấy dữ liệu từ phần tử đầu tiên trong mảng
+    const [carbData, setCarbData] = useState(0);
+    const [fatData, setFatData] = useState(0);
+    const [proteinData, setProteinData] = useState(0);
+    const [user, setUser] = useState(null);
+    useEffect(() => {
+        getUserData()
+    }, []);
+    const getUserData = async () => {
+        try {
+            const currentUser = await AsyncStorage.getItem('currentUser');
+            if (currentUser) {
+                const parsedUser = JSON.parse(currentUser);
+                setUser(parsedUser);
+                console.log("Data của nutri:" + parsedUser.id)
+                fetchNutritions(parsedUser.id)
+            }
+        } catch (error) {
+            console.error('Error fetching user data', error);
+        }
+    };
+    const fetchNutritions = async (userId) => {
+        try {
+            const today = new Date().toISOString().split('T')[0];
+            console.log(today);
+            const response = await fetch(`http://localhost:3000/api/nutritions/${userId}/${today}`);
+            const data = await response.json();
+            console.log("Dữ liệu từ API:", data);
+
+            
+            if (Array.isArray(data) && data.length > 0) {
+                const nutritionData = data[0]; 
+                setProteinData(nutritionData.protein);
+                setCarbData(nutritionData.carbs);
+                setFatData(nutritionData.fats);
+            } else {
+                console.log("Không có dữ liệu dinh dưỡng");
+            }
+        } catch (error) {
+            console.error('Lỗi khi gọi API:', error);
+        }
+    };
+
+
 
     const radiusFat = 35;
-    const radiusProtein = 45; // Protein có bán kính lớn hơn
-    const radiusCarbs = 55;   // Carbs có bán kính lớn nhất
-
+    const radiusProtein = 45;
+    const radiusCarbs = 55;
     const circumferenceFat = 2 * Math.PI * radiusFat;
     const circumferenceProtein = 2 * Math.PI * radiusProtein;
     const circumferenceCarbs = 2 * Math.PI * radiusCarbs;
@@ -25,16 +61,20 @@ const NutritionTracker = ({navigation}) => {
 
 
     // Tính toán tổng calo từ fat, protein và carbs
-    const totalKcal = fat * 9 + protein * 4 + carb * 4;
-    const kcalAutal = 2200;
-    const proteins = kcalAutal * 0.3 / 4
-    const fats = kcalAutal * 0.3 / 9
-    const carbs = kcalAutal * 0.4 / 4
+    const totalKcal = fatData * 9 + proteinData * 4 + carbData * 4;
+    const kcalExpectation = 2200;
+    const proteins = kcalExpectation * 0.3 / 4
+    const fats = kcalExpectation * 0.3 / 9
+    const carbs = kcalExpectation * 0.4 / 4
 
 
-    const progressFat = (fat / fats) * circumferenceFat;
-    const progressProtein = (protein / proteins) * circumferenceProtein;
-    const progressCarbs = (carb / carbs) * circumferenceCarbs;
+    
+    const limitProgress = (value, max) => Math.min(value, max);
+
+    const progressFat = limitProgress((fatData / fats) * circumferenceFat, circumferenceFat);
+    const progressProtein = limitProgress((proteinData / proteins) * circumferenceProtein, circumferenceProtein);
+    const progressCarbs = limitProgress((carbData / carbs) * circumferenceCarbs, circumferenceCarbs);
+
 
     // Hàm tính tỷ lệ phần trăm
     const calculatePercentage = (currentValue, totalValue) => {
@@ -130,9 +170,9 @@ const NutritionTracker = ({navigation}) => {
                 </Svg>
                 <View style={{ position: 'absolute', alignItems: 'center' }}>
                     <Text style={{ fontWeight: 'bold', fontSize: 20 }}>
-                        {calculatePercentage(totalKcal, kcalAutal).toFixed(1)}%
+                        {calculatePercentage(totalKcal, kcalExpectation).toFixed(1)}%
                     </Text>
-                    <Text style={{ fontSize: 15 }}>of {kcalAutal} kcal</Text>
+                    <Text style={{ fontSize: 15 }}>of {kcalExpectation} kcal</Text>
                 </View>
 
             </View>
@@ -145,10 +185,10 @@ const NutritionTracker = ({navigation}) => {
                         <Text>Fat</Text>
                     </View>
                     <View style={{ width: '30%', alignItems: 'center' }}>
-                        <Text style={{ fontWeight: 'bold', fontSize: 15 }}>{fat} g</Text>
+                        <Text style={{ fontWeight: 'bold', fontSize: 15 }}>{fatData} g</Text>
                     </View>
                     <View style={{ width: '30%', alignItems: 'center' }}>
-                        <Text style={{ fontWeight: 'bold', fontSize: 15 }}>{calculatePercentage(fat, fats).toFixed(1)}%</Text>
+                        <Text style={{ fontWeight: 'bold', fontSize: 15 }}>{calculatePercentage(fatData, fats).toFixed(1)}%</Text>
                     </View>
                 </View>
                 <View style={{ paddingHorizontal: 10, paddingVertical: 10, flexDirection: 'row', borderWidth: 2, borderRadius: 10, borderColor: '#f6f6f7' }}>
@@ -157,10 +197,10 @@ const NutritionTracker = ({navigation}) => {
                         <Text>Protein</Text>
                     </View>
                     <View style={{ width: '30%', alignItems: 'center' }}>
-                        <Text style={{ fontWeight: 'bold', fontSize: 15 }}>{protein} g</Text>
+                        <Text style={{ fontWeight: 'bold', fontSize: 15 }}>{proteinData} g</Text>
                     </View>
                     <View style={{ width: '30%', alignItems: 'center' }}>
-                        <Text style={{ fontWeight: 'bold', fontSize: 15 }}>{calculatePercentage(protein, proteins).toFixed(1)}%</Text>
+                        <Text style={{ fontWeight: 'bold', fontSize: 15 }}>{calculatePercentage(proteinData, proteins).toFixed(1)}%</Text>
                     </View>
                 </View>
                 <View style={{ paddingHorizontal: 10, paddingVertical: 10, flexDirection: 'row', borderWidth: 2, borderRadius: 10, borderColor: '#f6f6f7' }}>
@@ -169,10 +209,10 @@ const NutritionTracker = ({navigation}) => {
                         <Text>Carbs</Text>
                     </View>
                     <View style={{ width: '30%', alignItems: 'center' }}>
-                        <Text style={{ fontWeight: 'bold', fontSize: 15 }}>{carbs} g</Text>
+                        <Text style={{ fontWeight: 'bold', fontSize: 15 }}>{carbData} g</Text>
                     </View>
                     <View style={{ width: '30%', alignItems: 'center' }}>
-                        <Text style={{ fontWeight: 'bold', fontSize: 15 }}>{calculatePercentage(carb, carbs).toFixed(1)}%</Text>
+                        <Text style={{ fontWeight: 'bold', fontSize: 15 }}>{calculatePercentage(carbData, carbs).toFixed(1)}%</Text>
                     </View>
                 </View>
             </View>
@@ -192,8 +232,8 @@ const styles = StyleSheet.create({
     nutritionInfo: { flexDirection: 'row', justifyContent: 'space-around', width: '100%', marginTop: 20 },
     nutritionItem: { alignItems: 'center' },
     nutritionLabel: { color: '#f39c12', fontSize: 16 },
-    button: {flexDirection:'row',alignItems:'center',justifyContent:'center',backgroundColor: '#00bdd6', padding: 15, borderRadius: 10, marginTop: 30 },
-    buttonText: {marginLeft:5, color: '#fff', fontSize: 18 },
+    button: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#00bdd6', padding: 15, borderRadius: 10, marginTop: 30 },
+    buttonText: { marginLeft: 5, color: '#fff', fontSize: 18 },
 });
 
 export default NutritionTracker;

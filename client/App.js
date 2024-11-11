@@ -12,12 +12,13 @@ import SleepTracker from './components/SleepTracker';
 import NutritionTracker from './components/NutriTracker';
 import AllData from './components/AllData';
 import Register from './components/Register';
+import InforCycle from './components/InforCycle';
 const Stack = createNativeStackNavigator();
 import Toast from 'react-native-toast-message';
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName='Login'>
+      <Stack.Navigator initialRouteName='InforCycle'>
         <Stack.Screen name='Login' component={Login} options={{ headerShown: false }} />
         <Stack.Screen name='Home' component={Home} options={{ headerShown: false }} />
         <Stack.Screen name='Explore' component={Explore} options={{ headerShown: false }} />
@@ -29,6 +30,7 @@ export default function App() {
         <Stack.Screen name='CycleTracking' component={CycleTracking} options={{ headerShown: false }} />
         <Stack.Screen name='AllData' component={AllData} options={{ headerShown: false }} />
         <Stack.Screen name='Register' component={Register} options={{ headerShown: false }} />
+        <Stack.Screen name='InforCycle' component={InforCycle} options={{ headerShown: false }} />
       </Stack.Navigator>
       <Toast ref={(ref) => Toast.setRef(ref)} />
     </NavigationContainer>

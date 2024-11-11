@@ -5,8 +5,8 @@ const userController = require('../controllers/userController');
 const stepController = require('../controllers/stepController');
 const sleepController = require('../controllers/sleepController');
 const nutritionController = require('../controllers/nutritionController');
-const authContronller= require('../controllers/authController')
-
+const authController= require('../controllers/authController')
+const cycleController = require('../controllers/cycleController')
 // Routes cho User
 router.post('/users', userController.addUser);
 router.get('/users/:id', userController.getUser);
@@ -23,5 +23,8 @@ router.get('/sleeps/:userId/', sleepController.getSleep);
 router.post('/nutritions', nutritionController.createNutrition);
 router.get('/nutritions/:userId/:date', nutritionController.getNutrition);
 
-router.post('/login', authContronller.login);
+router.post('/login', authController.login);
+
+router.post('/cycle',cycleController.addCycle)
+router.get('/cycle/:userId',cycleController.getCyclesByUser)
 module.exports = router;
