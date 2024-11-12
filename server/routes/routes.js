@@ -27,4 +27,5 @@ router.post('/login', authController.login);
 
 router.post('/cycle',cycleController.addCycle)
 router.get('/cycle/:userId',cycleController.getCyclesByUser)
+router.delete('/cycle/:id', cycleController.deleteCycle);
 module.exports = router;

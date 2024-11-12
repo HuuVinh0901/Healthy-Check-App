@@ -13,12 +13,13 @@ import NutritionTracker from './components/NutriTracker';
 import AllData from './components/AllData';
 import Register from './components/Register';
 import InforCycle from './components/InforCycle';
+import AddMeal from './components/AddMeal';
 const Stack = createNativeStackNavigator();
 import Toast from 'react-native-toast-message';
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName='InforCycle'>
+      <Stack.Navigator initialRouteName='Login'>
         <Stack.Screen name='Login' component={Login} options={{ headerShown: false }} />
         <Stack.Screen name='Home' component={Home} options={{ headerShown: false }} />
         <Stack.Screen name='Explore' component={Explore} options={{ headerShown: false }} />
@@ -31,6 +32,7 @@ export default function App() {
         <Stack.Screen name='AllData' component={AllData} options={{ headerShown: false }} />
         <Stack.Screen name='Register' component={Register} options={{ headerShown: false }} />
         <Stack.Screen name='InforCycle' component={InforCycle} options={{ headerShown: false }} />
+        <Stack.Screen name='AddMeal' component={AddMeal} options={{ headerShown: false }} />
       </Stack.Navigator>
       <Toast ref={(ref) => Toast.setRef(ref)} />
     </NavigationContainer>

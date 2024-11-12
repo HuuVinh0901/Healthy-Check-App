@@ -1,21 +1,18 @@
 const Cycle = require('../models/cycle'); // Import model Cycle
 const User = require('../models/user'); // Import model User
 
-// Thêm chu kỳ mới cho người dùng
 const addCycle = async (req, res) => {
   try {
-    const { userId, start_date } = req.body;
-
-    // Kiểm tra xem người dùng có tồn tại hay không
+    const { userId, startDate,endDate, cycleLength } = req.body;
     const user = await User.findByPk(userId);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-
-    // Tạo chu kỳ mới cho người dùng
     const cycle = await Cycle.create({
-      user_id: userId,
-      start_date,
+      userId,
+      startDate,
+      endDate,
+      cycleLength,
     });
 
     res.status(201).json(cycle);
@@ -27,7 +24,7 @@ const addCycle = async (req, res) => {
 const getCyclesByUser = async (req, res) => {
   try {
     const cycles = await Cycle.findAll({
-      where: { userId: req.params.userId}
+      where: { userId: req.params.userId }
     });
     if (cycles.length === 0) {
       return res.status(404).json({ message: 'No sleep data found' });
@@ -58,5 +55,21 @@ const getLatestCycle = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
+const deleteCycle = async (req, res) => {
+  const { id } = req.params;
 
-module.exports = { addCycle, getCyclesByUser, getLatestCycle };
+  try {
+      const cycle = await Cycle.findByPk(id);
+
+      if (!cycle) {
+          return res.status(404).json({ message: 'Cycle not found' });
+      }
+
+      await cycle.destroy();
+      res.status(200).json({ message: 'Cycle deleted successfully' });
+  } catch (error) {
+      console.error('Error deleting cycle:', error);
+      res.status(500).json({ message: 'Internal server error' });
+  }
+};
+module.exports = { addCycle, getCyclesByUser, getLatestCycle ,deleteCycle};

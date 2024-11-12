@@ -4,67 +4,57 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Entypo from '@expo/vector-icons/Entypo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import DateTimePickerModal from '@react-native-community/datetimepicker';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import moment from 'moment';
 const CycleTrackingScreen = ({ navigation }) => {
   const [selectedDay, setSelectedDay] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [user, setUser] = useState(null);
   const [cycleData, setCycleData] = useState([]);
-  const [isModalVisible, setIsModalVisible] = useState(false);  // State để kiểm soát hiển thị modal
-  const [startDate, setStartDate] = useState(''); // Trạng thái lưu trữ ngày bắt đầu
-  const [endDate, setEndDate] = useState('');
-  const [startDateError, setStartDateError] = useState('');
-  const [endDateError, setEndDateError] = useState('');
+  const [daysUntilNextPeriod, setDaysUntilNextPeriod] = useState(null);
   useEffect(() => {
     getUserData();
     const today = new Date();
     setSelectedDay(today.getDate().toString().padStart(2, '0'));
   }, []);
-  const handleDateChange = (text, type) => {
-    const formattedDate = moment(text, 'DD/MM/YYYY', true).isValid()
-      ? moment(text, 'DD/MM/YYYY').format('DD/MM/YYYY')
-      : text;
 
-    if (type === 'start') {
-      if (!moment(formattedDate, 'DD/MM/YYYY', true).isValid()) {
-        setStartDateError('Start date invalid format dd/MM/YYYY');
-      } else {
-        setStartDateError('');
-        setStartDate(formattedDate); // Luôn cập nhật giá trị khi nhập đúng
-      }
-    } else {
-      if (!moment(formattedDate, 'DD/MM/YYYY', true).isValid()) {
-        setEndDateError('End date invalid format dd/MM/YYYY');
-      } else if (moment(formattedDate).isBefore(moment(startDate, 'DD/MM/YYYY'))) {
-        setEndDateError('End date not after start date');
-      } else {
-        setEndDateError('');
-        setEndDate(formattedDate); // Cập nhật giá trị khi nhập đúng
-      }
+  useEffect(() => {
+    if (cycleData.length > 0) {
+      calculateDaysUntilNextPeriod();
     }
-  };
+  }, [cycleData]);
+
   const getUserData = async () => {
     try {
       const currentUser = await AsyncStorage.getItem('currentUser');
       if (currentUser) {
         const parsedUser = JSON.parse(currentUser);
         setUser(parsedUser);
-        console.log("Data của step:" + parsedUser.id)
-        fetchCycleData(parsedUser.id)
+        fetchCycleData(parsedUser.id);
       }
     } catch (error) {
-      console.error('Error fetching user data', error);
+      console.error('Lỗi khi lấy dữ liệu người dùng', error);
     }
   };
+
   const fetchCycleData = async (userId) => {
     try {
       const response = await fetch(`http://localhost:3000/api/cycle/${userId}`);
       const data = await response.json();
       setCycleData(data || []);
-      console.log(data)
     } catch (error) {
       console.error('Lỗi khi gọi API:', error);
+    }
+  };
+
+  const calculateDaysUntilNextPeriod = () => {
+    const lastCycle = cycleData[cycleData.length - 1]; // Lấy chu kỳ gần nhất
+    if (lastCycle) {
+      const lastEndDate = moment(lastCycle.endDate, 'YYYY-MM-DD');
+      const nextCycleStartDate = lastEndDate.add(lastCycle.cycleLength, 'days');
+      const diffDays = nextCycleStartDate.diff(moment(currentDate), 'days');
+      setDaysUntilNextPeriod(diffDays);
+      
     }
   };
 
@@ -80,32 +70,25 @@ const CycleTrackingScreen = ({ navigation }) => {
 
   const days = generateCalendar();
   const weekDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-  const handleConfirmDate = (date, type) => {
-    if (type === 'start') {
-      setStartDate(date);
-    } else {
-      setEndDate(date);
-    }
-  };
 
-  const handleSaveCycle = () => {
-    // Xử lý lưu thông tin chu kỳ
-    console.log('Start Date:', startDate);
-    console.log('End Date:', endDate);
-    // Sau khi lưu, đóng modal
-    setIsModalVisible(false);
-  };
+
   return (
     <ScrollView style={styles.container}>
-      <View style={{ flexDirection: 'row' }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <TouchableOpacity style={{ width: '30%', justifyContent: 'center' }}
           onPress={() => { navigation.navigate('Home') }}>
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
-        <View>
+        <View style={{ width: '50%' }}>
           <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Cycle tracking</Text>
         </View>
-
+        {/* <View style={{ width: '20%' }}>
+          <TouchableOpacity style={{ justifyContent: 'center', paddingVertical: 5, backgroundColor: '#00bdd6', alignItems: 'center', flexDirection: 'row', borderRadius: 20, borderWidth: 2, borderColor: '#f6f6f7' }}
+            onPress={() => navigation.navigate('InforCycle')}>
+            <MaterialIcons name="my-library-add" size={18} color="white" />
+            <Text style={{ color: 'white', marginLeft: 5 }}>New</Text>
+          </TouchableOpacity>
+        </View> */}
       </View>
       <View style={styles.dateContainer}>
 
@@ -133,12 +116,15 @@ const CycleTrackingScreen = ({ navigation }) => {
       {/* Hình tròn ở giữa */}
       <View style={styles.circleContainer}>
         <Text style={styles.periodText}>Period in</Text>
-        <Text style={styles.daysText}>12 days</Text>
+        <Text style={styles.daysText}>{daysUntilNextPeriod}</Text>
         <Text style={styles.chanceText}>Low chance of getting pregnant</Text>
-        <TouchableOpacity style={styles.editButton} onPress={() => setIsModalVisible(true)}>
+        <TouchableOpacity style={styles.editButton} 
+        onPress={() => navigation.navigate('InforCycle')}>
           <Text style={styles.editButtonText}>Edit period dates</Text>
         </TouchableOpacity>
+        
       </View>
+
 
       <View style={{ marginHorizontal: 10 }}>
         <Text style={{ fontWeight: 'bold', fontSize: 20 }}>How are you feel today?</Text>
@@ -180,47 +166,16 @@ const CycleTrackingScreen = ({ navigation }) => {
           <Text style={{ fontWeight: 'bold', fontSize: 18 }}>Craving sweets on your period? Here's why & what to do about it</Text>
         </View>
       </TouchableOpacity>
-      <Modal
-        visible={isModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setIsModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Edit Period Dates</Text>
-
-            <Text>Start Date:</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="DD/MM/YYYY"
-              value={startDate}  // giá trị luôn được cập nhật
-              onChangeText={(text) => handleDateChange(text, 'start')}
-              keyboardType="numeric"
-            />
-            {startDateError ? <Text style={styles.errorText}>{startDateError}</Text> : null}
-
-            <Text>End Date:</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="DD/MM/YYYY"
-              value={endDate}
-              onChangeText={(text) => handleDateChange(text, 'end')}
-              keyboardType="numeric"
-            />
-            {endDateError ? <Text style={styles.errorText}>{endDateError}</Text> : null}
-            <Text>Start Date: {startDate}</Text>
-            <Text>End Date: {endDate}</Text>
-
-            <TouchableOpacity style={styles.saveButton} onPress={handleSaveCycle}>
-              <Text style={styles.saveButtonText}>Save</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.cancelButton} onPress={() => setIsModalVisible(false)}>
-              <Text style={styles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      {/* <DatePickerModal
+        locale="en"
+        mode="single"
+        visible={showEditPicker}
+        onDismiss={() => setShowEditPicker(false)}
+        date={editDate}
+        // onConfirm={handleStartDateConfirm}
+        saveLabel="Choose"
+        label="Choose end date cycle lastest"
+      /> */}
     </ScrollView>
   );
 };
@@ -366,5 +321,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
-
 export default CycleTrackingScreen;

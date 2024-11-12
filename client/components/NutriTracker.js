@@ -35,9 +35,9 @@ const NutritionTracker = ({ navigation }) => {
             const data = await response.json();
             console.log("Dữ liệu từ API:", data);
 
-            
+
             if (Array.isArray(data) && data.length > 0) {
-                const nutritionData = data[0]; 
+                const nutritionData = data[0];
                 setProteinData(nutritionData.protein);
                 setCarbData(nutritionData.carbs);
                 setFatData(nutritionData.fats);
@@ -68,7 +68,7 @@ const NutritionTracker = ({ navigation }) => {
     const carbs = kcalExpectation * 0.4 / 4
 
 
-    
+
     const limitProgress = (value, max) => Math.min(value, max);
 
     const progressFat = limitProgress((fatData / fats) * circumferenceFat, circumferenceFat);
@@ -82,145 +82,149 @@ const NutritionTracker = ({ navigation }) => {
     };
 
     return (
-        <ScrollView style={styles.container}>
+        <View style={styles.container}>
             <View style={{ flexDirection: 'row' }}>
-                <TouchableOpacity style={{ width: '40%', justifyContent: 'center' }}
-                    onPress={() => { navigation.navigate('Home') }}>
-                    <Ionicons name="arrow-back" size={24} color="black" />
+                    <TouchableOpacity style={{ width: '40%', justifyContent: 'center' }}
+                        onPress={() => { navigation.navigate('Home') }}>
+                        <Ionicons name="arrow-back" size={24} color="black" />
+                    </TouchableOpacity>
+                    <View>
+                        <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Nutrition</Text>
+                    </View>
+                </View>
+            <ScrollView>
+                
+                <View style={{ alignItems: 'center', marginTop: 20 }}>
+                    <Text style={styles.subtitle}>You have</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Text style={styles.subtitle}>consumed</Text>
+                        <Text style={styles.highlight}>{totalKcal} kcal</Text>
+                    </View>
+                    <Text style={styles.subtitle}>today</Text>
+                </View>
+                <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                    <Svg height="280" width="400" viewBox="0 0 120 120">
+                        {/* Vòng tròn carbs */}
+                        <Circle
+                            cx="60"
+                            cy="60"
+                            r={radiusCarbs}
+                            stroke="#f4f6fa"
+                            strokeWidth={strokeWidth}
+                            fill="none"
+                        />
+                        <Circle
+                            cx="60"
+                            cy="60"
+                            r={radiusCarbs}
+                            stroke="#1ce5ff"
+                            strokeWidth={strokeWidth}
+                            fill="none"
+                            strokeDasharray={circumferenceCarbs}
+                            strokeDashoffset={circumferenceCarbs - progressCarbs}
+                            strokeLinecap="round"
+                            transform="rotate(-90, 60, 60)"
+                        />
+
+                        {/* Vòng tròn protein */}
+                        <Circle
+                            cx="60"
+                            cy="60"
+                            r={radiusProtein}
+                            stroke="#f4f6fa"
+                            strokeWidth={strokeWidth}
+                            fill="none"
+                        />
+                        <Circle
+                            cx="60"
+                            cy="60"
+                            r={radiusProtein}
+                            stroke="#e77e7e"
+                            strokeWidth={strokeWidth}
+                            fill="none"
+                            strokeDasharray={circumferenceProtein}
+                            strokeDashoffset={circumferenceProtein - progressProtein}
+                            strokeLinecap="round"
+                            transform="rotate(-90, 60, 60)"
+                        />
+
+                        {/* Vòng tròn fat */}
+                        <Circle
+                            cx="60"
+                            cy="60"
+                            r={radiusFat}
+                            stroke="#f4f6fa"
+                            strokeWidth={strokeWidth}
+                            fill="none"
+                        />
+                        <Circle
+                            cx="60"
+                            cy="60"
+                            r={radiusFat}
+                            stroke="#f19b5d"
+                            strokeWidth={strokeWidth}
+                            fill="none"
+                            strokeDasharray={circumferenceFat}
+                            strokeDashoffset={circumferenceFat - progressFat}
+                            strokeLinecap="round"
+                            transform="rotate(-90, 60, 60)"
+                        />
+                    </Svg>
+                    <View style={{ position: 'absolute', alignItems: 'center' }}>
+                        <Text style={{ fontWeight: 'bold', fontSize: 20 }}>
+                            {calculatePercentage(totalKcal, kcalExpectation).toFixed(1)}%
+                        </Text>
+                        <Text style={{ fontSize: 15 }}>of {kcalExpectation} kcal</Text>
+                    </View>
+
+                </View>
+
+
+                <View style={{ marginHorizontal: 10, marginVertical: 10, gap: 10 }}>
+                    <View style={{ paddingHorizontal: 10, paddingVertical: 10, flexDirection: 'row', borderWidth: 2, borderRadius: 10, borderColor: '#f6f6f7' }}>
+                        <View style={{ width: '40%', flexDirection: 'row', gap: 10 }}>
+                            <FontAwesome name="circle" size={24} color="#f19b5d" />
+                            <Text>Fat</Text>
+                        </View>
+                        <View style={{ width: '30%', alignItems: 'center' }}>
+                            <Text style={{ fontWeight: 'bold', fontSize: 15 }}>{fatData} g</Text>
+                        </View>
+                        <View style={{ width: '30%', alignItems: 'center' }}>
+                            <Text style={{ fontWeight: 'bold', fontSize: 15 }}>{calculatePercentage(fatData, fats).toFixed(1)}%</Text>
+                        </View>
+                    </View>
+                    <View style={{ paddingHorizontal: 10, paddingVertical: 10, flexDirection: 'row', borderWidth: 2, borderRadius: 10, borderColor: '#f6f6f7' }}>
+                        <View style={{ width: '40%', flexDirection: 'row', gap: 10 }}>
+                            <FontAwesome name="circle" size={24} color="#e77e7e" />
+                            <Text>Protein</Text>
+                        </View>
+                        <View style={{ width: '30%', alignItems: 'center' }}>
+                            <Text style={{ fontWeight: 'bold', fontSize: 15 }}>{proteinData} g</Text>
+                        </View>
+                        <View style={{ width: '30%', alignItems: 'center' }}>
+                            <Text style={{ fontWeight: 'bold', fontSize: 15 }}>{calculatePercentage(proteinData, proteins).toFixed(1)}%</Text>
+                        </View>
+                    </View>
+                    <View style={{ paddingHorizontal: 10, paddingVertical: 10, flexDirection: 'row', borderWidth: 2, borderRadius: 10, borderColor: '#f6f6f7' }}>
+                        <View style={{ width: '40%', flexDirection: 'row', gap: 10 }}>
+                            <FontAwesome name="circle" size={24} color="#1ce5ff" />
+                            <Text>Carbs</Text>
+                        </View>
+                        <View style={{ width: '30%', alignItems: 'center' }}>
+                            <Text style={{ fontWeight: 'bold', fontSize: 15 }}>{carbData} g</Text>
+                        </View>
+                        <View style={{ width: '30%', alignItems: 'center' }}>
+                            <Text style={{ fontWeight: 'bold', fontSize: 15 }}>{calculatePercentage(carbData, carbs).toFixed(1)}%</Text>
+                        </View>
+                    </View>
+                </View>
+                <TouchableOpacity style={styles.button}
+                    onPress={() => { navigation.navigate('AddMeal') }}>
+                    <Entypo name="bowl" size={24} color="white" />
+                    <Text style={styles.buttonText}>Add meals</Text>
                 </TouchableOpacity>
-                <View>
-                    <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Nutrition</Text>
-                </View>
-            </View>
-            <View style={{ alignItems: 'center', marginTop: 20 }}>
-                <Text style={styles.subtitle}>You have</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Text style={styles.subtitle}>consumed</Text>
-                    <Text style={styles.highlight}>{totalKcal} kcal</Text>
-                </View>
-                <Text style={styles.subtitle}>today</Text>
-            </View>
-            <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                <Svg height="280" width="400" viewBox="0 0 120 120">
-                    {/* Vòng tròn carbs */}
-                    <Circle
-                        cx="60"
-                        cy="60"
-                        r={radiusCarbs}
-                        stroke="#f4f6fa"
-                        strokeWidth={strokeWidth}
-                        fill="none"
-                    />
-                    <Circle
-                        cx="60"
-                        cy="60"
-                        r={radiusCarbs}
-                        stroke="#1ce5ff"
-                        strokeWidth={strokeWidth}
-                        fill="none"
-                        strokeDasharray={circumferenceCarbs}
-                        strokeDashoffset={circumferenceCarbs - progressCarbs}
-                        strokeLinecap="round"
-                        transform="rotate(-90, 60, 60)"
-                    />
-
-                    {/* Vòng tròn protein */}
-                    <Circle
-                        cx="60"
-                        cy="60"
-                        r={radiusProtein}
-                        stroke="#f4f6fa"
-                        strokeWidth={strokeWidth}
-                        fill="none"
-                    />
-                    <Circle
-                        cx="60"
-                        cy="60"
-                        r={radiusProtein}
-                        stroke="#e77e7e"
-                        strokeWidth={strokeWidth}
-                        fill="none"
-                        strokeDasharray={circumferenceProtein}
-                        strokeDashoffset={circumferenceProtein - progressProtein}
-                        strokeLinecap="round"
-                        transform="rotate(-90, 60, 60)"
-                    />
-
-                    {/* Vòng tròn fat */}
-                    <Circle
-                        cx="60"
-                        cy="60"
-                        r={radiusFat}
-                        stroke="#f4f6fa"
-                        strokeWidth={strokeWidth}
-                        fill="none"
-                    />
-                    <Circle
-                        cx="60"
-                        cy="60"
-                        r={radiusFat}
-                        stroke="#f19b5d"
-                        strokeWidth={strokeWidth}
-                        fill="none"
-                        strokeDasharray={circumferenceFat}
-                        strokeDashoffset={circumferenceFat - progressFat}
-                        strokeLinecap="round"
-                        transform="rotate(-90, 60, 60)"
-                    />
-                </Svg>
-                <View style={{ position: 'absolute', alignItems: 'center' }}>
-                    <Text style={{ fontWeight: 'bold', fontSize: 20 }}>
-                        {calculatePercentage(totalKcal, kcalExpectation).toFixed(1)}%
-                    </Text>
-                    <Text style={{ fontSize: 15 }}>of {kcalExpectation} kcal</Text>
-                </View>
-
-            </View>
-
-
-            <View style={{ marginHorizontal: 10, marginVertical: 10, gap: 10 }}>
-                <View style={{ paddingHorizontal: 10, paddingVertical: 10, flexDirection: 'row', borderWidth: 2, borderRadius: 10, borderColor: '#f6f6f7' }}>
-                    <View style={{ width: '40%', flexDirection: 'row', gap: 10 }}>
-                        <FontAwesome name="circle" size={24} color="#f19b5d" />
-                        <Text>Fat</Text>
-                    </View>
-                    <View style={{ width: '30%', alignItems: 'center' }}>
-                        <Text style={{ fontWeight: 'bold', fontSize: 15 }}>{fatData} g</Text>
-                    </View>
-                    <View style={{ width: '30%', alignItems: 'center' }}>
-                        <Text style={{ fontWeight: 'bold', fontSize: 15 }}>{calculatePercentage(fatData, fats).toFixed(1)}%</Text>
-                    </View>
-                </View>
-                <View style={{ paddingHorizontal: 10, paddingVertical: 10, flexDirection: 'row', borderWidth: 2, borderRadius: 10, borderColor: '#f6f6f7' }}>
-                    <View style={{ width: '40%', flexDirection: 'row', gap: 10 }}>
-                        <FontAwesome name="circle" size={24} color="#e77e7e" />
-                        <Text>Protein</Text>
-                    </View>
-                    <View style={{ width: '30%', alignItems: 'center' }}>
-                        <Text style={{ fontWeight: 'bold', fontSize: 15 }}>{proteinData} g</Text>
-                    </View>
-                    <View style={{ width: '30%', alignItems: 'center' }}>
-                        <Text style={{ fontWeight: 'bold', fontSize: 15 }}>{calculatePercentage(proteinData, proteins).toFixed(1)}%</Text>
-                    </View>
-                </View>
-                <View style={{ paddingHorizontal: 10, paddingVertical: 10, flexDirection: 'row', borderWidth: 2, borderRadius: 10, borderColor: '#f6f6f7' }}>
-                    <View style={{ width: '40%', flexDirection: 'row', gap: 10 }}>
-                        <FontAwesome name="circle" size={24} color="#1ce5ff" />
-                        <Text>Carbs</Text>
-                    </View>
-                    <View style={{ width: '30%', alignItems: 'center' }}>
-                        <Text style={{ fontWeight: 'bold', fontSize: 15 }}>{carbData} g</Text>
-                    </View>
-                    <View style={{ width: '30%', alignItems: 'center' }}>
-                        <Text style={{ fontWeight: 'bold', fontSize: 15 }}>{calculatePercentage(carbData, carbs).toFixed(1)}%</Text>
-                    </View>
-                </View>
-            </View>
-            <TouchableOpacity style={styles.button}>
-                <Entypo name="bowl" size={24} color="white" />
-                <Text style={styles.buttonText}>Add meals</Text>
-            </TouchableOpacity>
-        </ScrollView>
+            </ScrollView>
+        </View>
     );
 };
 
