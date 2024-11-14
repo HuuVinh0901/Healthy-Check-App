@@ -46,7 +46,7 @@ const Share = ({navigation}) => {
                     </View>
                 </TouchableOpacity>
                 <TouchableOpacity style={{ marginTop: 20, flexDirection: 'row', backgroundColor: '#00bdd6', borderRadius: 20, marginHorizontal: 30, paddingVertical: 10, justifyContent: 'center' }}
-                >
+                onPress={() => { navigation.navigate('Sharing') }}>
                     <MaterialCommunityIcons name="share-outline" size={24} color="white" />
                     <Text style={{ fontSize: 20, marginLeft: 10, color: 'white' }}>Start sharing</Text>
                 </TouchableOpacity>
