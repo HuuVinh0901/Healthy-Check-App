@@ -9,7 +9,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 const AllData = ({ navigation }) => {
     return (
-        <View style={{ flex: 1, justifyContent: 'space-between', backgroundColor: '#fafafb' }}>
+        <View style={{ flex: 1,padding:10, backgroundColor: '#fafafb' }}>
             <View style={{ flexDirection: 'row', marginHorizontal: 10 }}>
                 <TouchableOpacity style={{ width: '30%', justifyContent: 'center' }}
                     onPress={() => { navigation.navigate('Home') }}>

@@ -5,15 +5,18 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Entypo from '@expo/vector-icons/Entypo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState, useEffect } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 const NutritionTracker = ({ navigation }) => {
 
     const [carbData, setCarbData] = useState(0);
     const [fatData, setFatData] = useState(0);
     const [proteinData, setProteinData] = useState(0);
     const [user, setUser] = useState(null);
-    useEffect(() => {
-        getUserData()
-    }, []);
+    useFocusEffect(
+        React.useCallback(() => {
+            getUserData();
+        }, [])
+    );
     const getUserData = async () => {
         try {
             const currentUser = await AsyncStorage.getItem('currentUser');
@@ -34,13 +37,21 @@ const NutritionTracker = ({ navigation }) => {
             const response = await fetch(`http://localhost:3000/api/nutritions/${userId}/${today}`);
             const data = await response.json();
             console.log("Dữ liệu từ API:", data);
-
-
+    
             if (Array.isArray(data) && data.length > 0) {
-                const nutritionData = data[0];
-                setProteinData(nutritionData.protein);
-                setCarbData(nutritionData.carbs);
-                setFatData(nutritionData.fats);
+                // Tính tổng dinh dưỡng từ tất cả các bữa ăn
+                const totalNutrition = data.reduce(
+                    (totals, meal) => ({
+                        protein: totals.protein + meal.protein,
+                        carbs: totals.carbs + meal.carbs,
+                        fats: totals.fats + meal.fats,
+                    }),
+                    { protein: 0, carbs: 0, fats: 0 } // Giá trị khởi tạo
+                );
+    
+                setProteinData(totalNutrition.protein);
+                setCarbData(totalNutrition.carbs);
+                setFatData(totalNutrition.fats);
             } else {
                 console.log("Không có dữ liệu dinh dưỡng");
             }
@@ -48,6 +59,7 @@ const NutritionTracker = ({ navigation }) => {
             console.error('Lỗi khi gọi API:', error);
         }
     };
+    
 
 
 
@@ -84,16 +96,16 @@ const NutritionTracker = ({ navigation }) => {
     return (
         <View style={styles.container}>
             <View style={{ flexDirection: 'row' }}>
-                    <TouchableOpacity style={{ width: '40%', justifyContent: 'center' }}
-                        onPress={() => { navigation.navigate('Home') }}>
-                        <Ionicons name="arrow-back" size={24} color="black" />
-                    </TouchableOpacity>
-                    <View>
-                        <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Nutrition</Text>
-                    </View>
+                <TouchableOpacity style={{ width: '40%', justifyContent: 'center' }}
+                    onPress={() => { navigation.navigate('Home') }}>
+                    <Ionicons name="arrow-back" size={24} color="black" />
+                </TouchableOpacity>
+                <View>
+                    <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Nutrition</Text>
                 </View>
+            </View>
             <ScrollView>
-                
+
                 <View style={{ alignItems: 'center', marginTop: 20 }}>
                     <Text style={styles.subtitle}>You have</Text>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>

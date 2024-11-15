@@ -12,7 +12,7 @@ const Login = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [secureText, setSecureText] = useState(true);
-  
+
   const handleLogin = async () => {
     // Kiểm tra nếu email hoặc mật khẩu trống
     if (!email || !password) {
@@ -23,23 +23,23 @@ const Login = ({ navigation }) => {
       });
       return; // Dừng lại nếu có trường nào trống
     }
-  
+
     try {
       const response = await axios.post('http://localhost:3000/api/login', {
         email,
         password,
       });
-  
+
       // Kiểm tra status trả về từ server
       if (response.status === 200) {
         // Đăng nhập thành công
         await AsyncStorage.setItem('token', response.data.token);
         // Lưu thông tin người dùng vào AsyncStorage
         await AsyncStorage.setItem('currentUser', JSON.stringify(response.data.user));
-  
+
         // Kiểm tra lưu trữ thông tin người dùng
         console.log(response.data)
-  
+
         navigation.navigate('Home');
       } else if (response.status === 400 || response.status === 404) {
         // Nếu email hoặc mật khẩu sai (400 hoặc 404)
@@ -66,7 +66,7 @@ const Login = ({ navigation }) => {
       });
     }
   };
-  
+
 
   const togglePasswordVisibility = () => {
     setSecureText(!secureText);
@@ -82,14 +82,15 @@ const Login = ({ navigation }) => {
       </View>
       <View style={{ marginHorizontal: 15 }}>
         <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Email</Text>
-        <View style={{ borderRadius: 10, backgroundColor: '#f3f4f6', paddingHorizontal: 20, paddingVertical: 10, marginTop: 5 }}>
-          <TextInput
-            placeholder="Enter email"
-            onChangeText={setEmail}
-            value={email}
-            keyboardType="email-address"
-          />
-        </View>
+
+        <TextInput
+          style={{ borderRadius: 10, backgroundColor: '#f3f4f6', paddingHorizontal: 20, paddingVertical: 10, marginTop: 5 }}
+          placeholder="Enter email"
+          onChangeText={setEmail}
+          value={email}
+          keyboardType="email-address"
+        />
+
       </View>
       <View style={{ marginHorizontal: 15, marginTop: 10 }}>
         <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Password</Text>

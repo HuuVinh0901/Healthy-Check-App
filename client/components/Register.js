@@ -97,14 +97,14 @@ const Register = ({ navigation }) => {
     const registerUser = async () => {
         try {
             // Sử dụng link ảnh mẫu thay vì upload lên Imgur
-            const avatarUrl = 'https://i.imgur.com/your-sample-image.jpg'; 
+            const avatarUrl = 'https://i.imgur.com/your-sample-image.jpg';
 
             const userData = {
                 name: name,
                 gender: gender,
                 email: email,
                 password: password,
-                avatar: avatarUrl, 
+                avatar: avatarUrl,
             };
 
 
@@ -114,7 +114,7 @@ const Register = ({ navigation }) => {
             // Kiểm tra nếu đăng ký thành công
             if (response.status === 201) {
                 console.log("User registered successfully:", response.data);
-                navigation.navigate('Login'); 
+                navigation.navigate('Login');
             }
         } catch (error) {
             console.error("Error registering user:", error);
@@ -140,23 +140,23 @@ const Register = ({ navigation }) => {
             {/* Các trường email và mật khẩu */}
             <View style={{ marginHorizontal: 15 }}>
                 <Text style={{ fontSize: 20, fontWeight: 'bold' }}>User name</Text>
-                <View style={{ borderRadius: 10, backgroundColor: '#f3f4f6', paddingHorizontal: 20, paddingVertical: 10, marginTop: 5 }}>
-                    <TextInput
-                        placeholder="Enter your user name"
-                        value={name}
-                        onChangeText={setName}
-                    />
-                </View>
+
+                <TextInput style={{ borderRadius: 10, backgroundColor: '#f3f4f6', paddingHorizontal: 20, paddingVertical: 10, marginTop: 5 }}
+                    placeholder="Enter your user name"
+                    value={name}
+                    onChangeText={setName}
+                />
+
             </View>
             <View style={{ marginHorizontal: 15 }}>
                 <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Email</Text>
-                <View style={{ borderRadius: 10, backgroundColor: '#f3f4f6', paddingHorizontal: 20, paddingVertical: 10, marginTop: 5 }}>
-                    <TextInput
-                        placeholder="Enter your email"
-                        value={email}
-                        onChangeText={setEmail}
-                    />
-                </View>
+
+                <TextInput style={{ borderRadius: 10, backgroundColor: '#f3f4f6', paddingHorizontal: 20, paddingVertical: 10, marginTop: 5 }}
+                    placeholder="Enter your email"
+                    value={email}
+                    onChangeText={setEmail}
+                />
+
             </View>
 
             <View style={{ marginHorizontal: 15, marginTop: 10 }}>

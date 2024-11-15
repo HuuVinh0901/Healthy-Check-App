@@ -31,7 +31,27 @@ const getStepsByUser = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+const getAllStepsByUser = async (req, res) => {
+  // Lấy userId từ params vì nó được truyền qua URL
+  const { userId} = req.params;
+
+  try {
+    // Truy vấn bảng Step để lấy số bước của người dùng tại một ngày cụ thể
+    const steps = await Step.findOne({ where: { userId: userId} });
+
+    // Nếu tìm thấy bước, trả về thông tin
+    if (steps) {
+      res.json({ steps: steps.steps});
+    } else {
+      // Nếu không tìm thấy bước nào cho người dùng, trả về mã 404
+      res.status(404).json({ message: 'No steps found for this user on this date' });
+    }
+  } catch (error) {
+    // Xử lý lỗi nếu có vấn đề với truy vấn cơ sở dữ liệu
+    res.status(500).json({ error: error.message });
+  }
+};
 
 
 
-module.exports = { createStep, getStepsByUser };
+module.exports = { createStep, getStepsByUser,getAllStepsByUser };
