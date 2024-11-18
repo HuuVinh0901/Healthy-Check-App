@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const { DataTypes } = require('sequelize');
-const sequelize = require('../sequelize'); 
+const sequelize = require('../sequelize');
 
 const User = sequelize.define('User', {
   id: {
@@ -21,23 +21,36 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  avatar: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
   email: {
     type: DataTypes.STRING,
     allowNull: true,
-  }
+  },
+  // email: {
+  //   type: DataTypes.STRING,
+  //   allowNull: false,
+  //   unique: true,
+  //   validate: {
+  //     isEmail: true, // Đảm bảo email hợp lệ
+  //   },
+  // },
+
+  role: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: 'user',
+    validate: {
+      isIn: [['user', 'admin']],
+    },
+  },
 }, {
-  tableName: 'users', 
-  timestamps: true, 
+  tableName: 'users',
+  timestamps: true,
   hooks: {
     beforeCreate: async (user) => {
-      
+
       if (user.password) {
-        const salt = await bcrypt.genSalt(10); 
-        user.password = await bcrypt.hash(user.password, salt); 
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(user.password, salt);
       }
     }
   }

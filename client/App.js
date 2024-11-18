@@ -16,12 +16,14 @@ import InforCycle from './components/InforCycle';
 import AddMeal from './components/AddMeal';
 import Blog from './components/Blog'
 import Sharing from './components/Sharing';
+import Admin from './components/Admin';
+import MyAbout from './components/MyAbout';
 const Stack = createNativeStackNavigator();
 import Toast from 'react-native-toast-message';
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName='Home'>
+      <Stack.Navigator initialRouteName='MyAbout'>
         <Stack.Screen name='Login' component={Login} options={{ headerShown: false }} />
         <Stack.Screen name='Home' component={Home} options={{ headerShown: false }} />
         <Stack.Screen name='Explore' component={Explore} options={{ headerShown: false }} />
@@ -36,7 +38,9 @@ export default function App() {
         <Stack.Screen name='InforCycle' component={InforCycle} options={{ headerShown: false }} />
         <Stack.Screen name='AddMeal' component={AddMeal} options={{ headerShown: false }} />
         <Stack.Screen name='Blog' component={Blog} options={{ headerShown: false }} />
+        <Stack.Screen name='Admin' component={Admin} options={{ headerShown: false }} />
         <Stack.Screen name='Sharing' component={Sharing} options={{ headerShown: false }} />
+        <Stack.Screen name='MyAbout' component={MyAbout} options={{ headerShown: false }} />
       </Stack.Navigator>
       <Toast ref={(ref) => Toast.setRef(ref)} />
     </NavigationContainer>

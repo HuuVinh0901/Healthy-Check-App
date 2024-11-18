@@ -5,35 +5,36 @@ const User = require('../models/user');
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
-
         const user = await User.findOne({ where: { email } });
 
         if (!user) {
-            // Thông báo lỗi khi người dùng không tồn tại
+            console.log('User not found:', email);
             return res.status(404).json({ message: 'User not found' });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
-
         if (!isMatch) {
-            // Thông báo lỗi khi mật khẩu sai
+            console.log('Password mismatch for:', email);
             return res.status(400).json({ message: 'Incorrect password' });
         }
 
+        console.log('Password match, generating token...');
         const token = jwt.sign({ userId: user.id }, 'secret_key', { expiresIn: '1h' });
+
         res.status(200).json({
             message: 'Login successful',
             token,
             user: {
                 id: user.id,
                 email: user.email,
-                name: user.name,  // Thêm các trường khác nếu cần
+                name: user.name,
+                role: user.role, 
+                gender:user.gender
             },
         });
-        
+
     } catch (err) {
-        // Xử lý lỗi hệ thống và trả về thông báo lỗi
-        console.error(err);
+        console.error('Error during login:', err);
         res.status(500).json({ error: 'An error occurred during login' });
     }
 };

@@ -21,35 +21,30 @@ const Login = ({ navigation }) => {
         text1: 'Login Failed',
         text2: 'Please enter both email and password.',
       });
-      return; // Dừng lại nếu có trường nào trống
+      return;
     }
-
+    console.log('Attempting login with:', { email, password }); 
     try {
       const response = await axios.post('http://localhost:3000/api/login', {
         email,
         password,
       });
-
-      // Kiểm tra status trả về từ server
+      
       if (response.status === 200) {
-        // Đăng nhập thành công
         await AsyncStorage.setItem('token', response.data.token);
-        // Lưu thông tin người dùng vào AsyncStorage
         await AsyncStorage.setItem('currentUser', JSON.stringify(response.data.user));
-
-        // Kiểm tra lưu trữ thông tin người dùng
-        console.log(response.data)
-
-        navigation.navigate('Home');
+        if (response.data.user.role === 'admin') {
+          navigation.navigate('Admin');
+        } else {
+          navigation.navigate('Home');
+        }
       } else if (response.status === 400 || response.status === 404) {
-        // Nếu email hoặc mật khẩu sai (400 hoặc 404)
         Toast.show({
           type: 'error',
           text1: 'Login Failed',
           text2: response.data.message || 'Invalid email or password.',
         });
       } else {
-        // Xử lý các lỗi khác từ server (nếu có)
         Toast.show({
           type: 'error',
           text1: 'Login Failed',
@@ -57,7 +52,6 @@ const Login = ({ navigation }) => {
         });
       }
     } catch (error) {
-      // Nếu có lỗi hệ thống (network error, server error, v.v.)
       console.error("Error during login", error);
       Toast.show({
         type: 'error',
@@ -66,6 +60,7 @@ const Login = ({ navigation }) => {
       });
     }
   };
+
 
 
   const togglePasswordVisibility = () => {

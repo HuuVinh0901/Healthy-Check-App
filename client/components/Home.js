@@ -21,6 +21,7 @@ const Home = ({ navigation }) => {
     const [cycleData, setCycleData] = useState([]);
     const [totalSleepTime, setTotalSleepTime] = useState(0);
     const [daysUntilNextPeriod, setDaysUntilNextPeriod] = useState(null);
+    const [gender, setGender] = useState('')
     useEffect(() => {
         getCurrentDate()
         getUserData();
@@ -55,6 +56,8 @@ const Home = ({ navigation }) => {
                 fetchNutritions(parsedUser.id)
                 fetchCycleData(parsedUser.id)
                 fetchSleepData(parsedUser.id)
+                setGender(parsedUser.gender)
+                setCurrentUserName(parsedUser.name)
             }
         } catch (error) {
             console.error('Error fetching user data', error);
@@ -62,7 +65,7 @@ const Home = ({ navigation }) => {
     };
     const fetchSteps = async (userId) => {
         try {
-            const today = new Date().toISOString().split('T')[0]; 
+            const today = new Date().toISOString().split('T')[0];
             console.log(today)// Lấy ngày hiện tại theo định dạng YYYY-MM-DD
             const response = await fetch(`http://localhost:3000/api/steps/${userId}/${today}`); // Thay bằng URL đúng của bạn
             const data = await response.json();
@@ -75,7 +78,7 @@ const Home = ({ navigation }) => {
         } catch (error) {
             console.error('Lỗi khi gọi API:', error);
         } finally {
-            
+
         }
     }
     const fetchStepsWeek = async (userId) => {
@@ -200,16 +203,28 @@ const Home = ({ navigation }) => {
     return (
         <View style={{ flex: 1, backgroundColor: '#fafafb', justifyContent: 'space-between', }}>
 
-            <View style={{ flexDirection: 'row', marginHorizontal: 15 }}>
-                <TouchableOpacity style={{ width: '50%', justifyContent: 'center' }}
-                    onPress={() => { navigation.navigate('Laugh') }}>
+            <View style={{ flexDirection: 'row', marginHorizontal: 15, justifyContent: 'space-between' }}>
+                <TouchableOpacity
+                    style={{ justifyContent: 'center' }}
+                    onPress={() => { navigation.navigate('Laugh') }}
+                >
                     <Ionicons name="arrow-back" size={24} color="black" />
                 </TouchableOpacity>
-                <View style={{ width: '50%', alignItems: 'flex-end' }}>
-                    <Image source={require('../assets/data/avatart.png')} />
-                </View>
 
+                <View style={{flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
+                    <TouchableOpacity onPress={() => { navigation.navigate('MyAbout') }}>
+                        <Image style={{ height: 70, width: 70 }}
+                            source={
+                                gender === 'male'
+                                    ? require('../assets/data/male.png')  
+                                    : require('../assets/data/female.png') 
+                            }
+                        />
+                    </TouchableOpacity>
+
+                </View>
             </View>
+
             <ScrollView style={{ height: 900, flex: 1 }}>
                 <View style={{ marginHorizontal: 15, flexDirection: 'row', alignItems: 'center' }}>
                     <Ionicons name="sunny-sharp" size={24} color="black" />
