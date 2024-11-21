@@ -4,19 +4,12 @@ const app = express();
 const routes = require('./routes/routes');
 const sequelize = require('./sequelize'); // Kết nối Sequelize
 const User = require('./models/user'); // Import model User của bạn
-const path = require('path');
-const fs = require('fs');
-const uploadFolder = path.join(__dirname, 'uploads');
-
-// Kiểm tra và tạo thư mục nếu chưa tồn tại
-// if (!fs.existsSync(uploadFolder)) {
-//     fs.mkdirSync(uploadFolder, { recursive: true });
-// }
 
 app.use(cors());
 app.use(express.json());
 app.use('/api', routes);
-app.use('/api', express.static(path.join(__dirname, 'uploads')));
+
+app.use('/uploads', express.static('uploads'));
 const PORT = 3000;
 const createDefaultAdmin = async () => {
     try {
@@ -28,6 +21,7 @@ const createDefaultAdmin = async () => {
                 email: 'admin@example.com',
                 password: '1234',
                 role: 'admin',
+                avatar:null,
                 gender: 'male'
             };
 
@@ -43,9 +37,8 @@ const createDefaultAdmin = async () => {
 sequelize.authenticate()
     .then(async () => {
         console.log('Connected to SQL Server via Sequelize');
-        // Đồng bộ database và tạo tài khoản admin mặc định
         await sequelize.sync({ alter: false });
-        await createDefaultAdmin(); // Tạo tài khoản admin
+        await createDefaultAdmin(); 
     })
     .catch(err => console.error('Unable to connect:', err));
 

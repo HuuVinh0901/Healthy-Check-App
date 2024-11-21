@@ -23,7 +23,7 @@ import Toast from 'react-native-toast-message';
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName='MyAbout'>
+      <Stack.Navigator initialRouteName='Login'>
         <Stack.Screen name='Login' component={Login} options={{ headerShown: false }} />
         <Stack.Screen name='Home' component={Home} options={{ headerShown: false }} />
         <Stack.Screen name='Explore' component={Explore} options={{ headerShown: false }} />

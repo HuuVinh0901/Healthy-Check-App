@@ -33,7 +33,10 @@ const User = sequelize.define('User', {
   //     isEmail: true, // Đảm bảo email hợp lệ
   //   },
   // },
-
+  avatar: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   role: {
     type: DataTypes.STRING,
     allowNull: false,

@@ -22,6 +22,7 @@ const Home = ({ navigation }) => {
     const [totalSleepTime, setTotalSleepTime] = useState(0);
     const [daysUntilNextPeriod, setDaysUntilNextPeriod] = useState(null);
     const [gender, setGender] = useState('')
+    const [avatar, setAvatar] = useState(null);
     useEffect(() => {
         getCurrentDate()
         getUserData();
@@ -51,6 +52,9 @@ const Home = ({ navigation }) => {
             if (currentUser) {
                 const parsedUser = JSON.parse(currentUser);
                 setUser(parsedUser);
+                console.log(parsedUser.avatar)
+                const imageUrl = `http://localhost:3000${parsedUser.avatar}`;
+                setAvatar(imageUrl);
                 fetchSteps(parsedUser.id)
                 fetchStepsWeek(parsedUser.id)
                 fetchNutritions(parsedUser.id)
@@ -58,6 +62,7 @@ const Home = ({ navigation }) => {
                 fetchSleepData(parsedUser.id)
                 setGender(parsedUser.gender)
                 setCurrentUserName(parsedUser.name)
+                
             }
         } catch (error) {
             console.error('Error fetching user data', error);
@@ -211,13 +216,15 @@ const Home = ({ navigation }) => {
                     <Ionicons name="arrow-back" size={24} color="black" />
                 </TouchableOpacity>
 
-                <View style={{flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
+                <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
                     <TouchableOpacity onPress={() => { navigation.navigate('MyAbout') }}>
-                        <Image style={{ height: 70, width: 70 }}
+                        <Image style={{ height: 70, width: 70,borderRadius:50 }}
                             source={
-                                gender === 'male'
-                                    ? require('../assets/data/male.png')  
-                                    : require('../assets/data/female.png') 
+                                avatar
+                                    ? { uri: avatar }
+                                    : gender === 'male'
+                                        ? require('../assets/data/male.png')
+                                        : require('../assets/data/female.png')
                             }
                         />
                     </TouchableOpacity>

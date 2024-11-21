@@ -22,12 +22,14 @@ const Register = ({ navigation }) => {
 
 
     const registerUser = async () => {
+        const avatar=null;
         try {
             const userData = {
                 name,
                 gender,
                 email,
                 password,
+                avatar,
                 role: 'user',
             };
 

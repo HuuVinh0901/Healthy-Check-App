@@ -13,12 +13,12 @@ const addUser = async (req, res) => {
       name,
       gender,
       email,
-      password,  
+      password,
       avatar,
       role: role || 'user',
     });
 
-    res.status(201).json(user); 
+    res.status(201).json(user);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -103,4 +103,6 @@ const updateUser = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
-module.exports = { addUser, getUserById, getRoleUser,deleteUser,updateUser};
+
+
+module.exports = { addUser, getUserById, getRoleUser, deleteUser, updateUser};
