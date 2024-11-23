@@ -18,12 +18,15 @@ import Blog from './components/Blog'
 import Sharing from './components/Sharing';
 import Admin from './components/Admin';
 import MyAbout from './components/MyAbout';
+import BMIScreen from './components/BMIScreen'
+import NoteScreen  from './components/NoteScreen '
+import HeartRateChecker from './components/HeartRateChecker ';
 const Stack = createNativeStackNavigator();
 import Toast from 'react-native-toast-message';
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName='Home'>
+      <Stack.Navigator initialRouteName='Admin'>
         <Stack.Screen name='Login' component={Login} options={{ headerShown: false }} />
         <Stack.Screen name='Home' component={Home} options={{ headerShown: false }} />
         <Stack.Screen name='Explore' component={Explore} options={{ headerShown: false }} />
@@ -41,6 +44,9 @@ export default function App() {
         <Stack.Screen name='Admin' component={Admin} options={{ headerShown: false }} />
         <Stack.Screen name='Sharing' component={Sharing} options={{ headerShown: false }} />
         <Stack.Screen name='MyAbout' component={MyAbout} options={{ headerShown: false }} />
+        <Stack.Screen name='BMIScreen' component={BMIScreen} options={{ headerShown: false }} />
+        <Stack.Screen name='NoteScreen' component={NoteScreen} options={{ headerShown: false }} />
+        <Stack.Screen name='HeartRateChecker' component={HeartRateChecker} options={{ headerShown: false }} />
       </Stack.Navigator>
       <Toast ref={(ref) => Toast.setRef(ref)} />
     </NavigationContainer>

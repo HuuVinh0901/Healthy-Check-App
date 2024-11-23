@@ -88,7 +88,7 @@ const Sharing = ({ navigation }) => {
         <View style={{ padding: 10, flex: 1, backgroundColor: '#fafafb' }}>
             <View style={{ flexDirection: 'row' }}>
                 <TouchableOpacity style={{ width: '38%', justifyContent: 'center' }}
-                    onPress={() => navigation.navigate('Share')}>
+                    onPress={() => { navigation.goBack(); }}>
                     <Ionicons name="arrow-back" size={24} color="black" />
                 </TouchableOpacity>
                 <View>

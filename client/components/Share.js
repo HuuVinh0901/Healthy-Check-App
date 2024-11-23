@@ -50,11 +50,11 @@ const Share = ({navigation}) => {
                     <MaterialCommunityIcons name="share-outline" size={24} color="white" />
                     <Text style={{ fontSize: 20, marginLeft: 10, color: 'white' }}>Start sharing</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={{ borderWidth: 1, marginTop: 20, flexDirection: 'row', borderRadius: 20, marginHorizontal: 30, paddingVertical: 10, justifyContent: 'center' }}
+                {/* <TouchableOpacity style={{ borderWidth: 1, marginTop: 20, flexDirection: 'row', borderRadius: 20, marginHorizontal: 30, paddingVertical: 10, justifyContent: 'center' }}
                 >
                     <Feather name="settings" size={24} color="black" />
                     <Text style={{ fontSize: 20, marginLeft: 10, }}>Setting</Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
             </ScrollView>
 
             <View style={{ marginTop: 10, flexDirection: 'row', paddingVertical: 20, backgroundColor: 'white', }}>

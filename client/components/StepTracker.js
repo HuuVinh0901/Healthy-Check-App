@@ -7,29 +7,29 @@ import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState, useEffect } from 'react';
-const StepTrackerScreen = ({navigation}) => {
+const StepTrackerScreen = ({ navigation }) => {
     const [user, setUser] = useState(null);
     const [steps, setSteps] = useState(0);
     useEffect(() => {
         const getUserData = async () => {
-          try {
-            const currentUser = await AsyncStorage.getItem('currentUser');
-            if (currentUser) {
-              const parsedUser = JSON.parse(currentUser);
-              setUser(parsedUser);
-               console.log("Data của step:"+parsedUser.id)
-               fetchSteps(parsedUser.id)
+            try {
+                const currentUser = await AsyncStorage.getItem('currentUser');
+                if (currentUser) {
+                    const parsedUser = JSON.parse(currentUser);
+                    setUser(parsedUser);
+                    console.log("Data của step:" + parsedUser.id)
+                    fetchSteps(parsedUser.id)
+                }
+            } catch (error) {
+                console.error('Error fetching user data', error);
             }
-          } catch (error) {
-            console.error('Error fetching user data', error);
-          }
         };
-      
+
         getUserData();
-      }, []);
-      const fetchSteps = async (userId) => {
+    }, []);
+    const fetchSteps = async (userId) => {
         try {
-            const today = new Date().toISOString().split('T')[0]; 
+            const today = new Date().toISOString().split('T')[0];
             console.log(today)// Lấy ngày hiện tại theo định dạng YYYY-MM-DD
             const response = await fetch(`http://localhost:3000/api/steps/${userId}/${today}`); // Thay bằng URL đúng của bạn
             const data = await response.json();
@@ -42,7 +42,7 @@ const StepTrackerScreen = ({navigation}) => {
         } catch (error) {
             console.error('Lỗi khi gọi API:', error);
         } finally {
-            
+
         }
     };
     const radius = 50;
@@ -54,17 +54,17 @@ const StepTrackerScreen = ({navigation}) => {
     const progressStep = (steps / goalStep) * 100;
     const progressOffsetStep = circumference - (progressStep / 100) * circumference;
     //calo
-    const kcal = steps*0.05; //Mỗi bước chân tiêu thụ 0.05kcal
+    const kcal = steps * 0.05; //Mỗi bước chân tiêu thụ 0.05kcal
     const goalKcal = 1700;
     const progressKcal = (kcal / goalKcal) * 100;
     const progressOffsetKcal = circumference - (progressKcal / 100) * circumference;
     //km
-    const km = (steps*0.5)/1000;
+    const km = (steps * 0.5) / 1000;
     const goalKm = 20;
     const progressKm = (km / goalKm) * 100;
     const progressOffsetKm = circumference - (progressKm / 100) * circumference;
     //TIme
-    const time = (km/5)*60;
+    const time = (km / 5) * 60;
     const goalTime = 200;
     const progressTime = (time / goalTime) * 100;
     const progressOffsetTime = circumference - (progressTime / 100) * circumference;
@@ -74,7 +74,7 @@ const StepTrackerScreen = ({navigation}) => {
         <View style={styles.container}>
             <View style={{ flexDirection: 'row' }}>
                 <TouchableOpacity style={{ width: '43%', justifyContent: 'center' }}
-                    onPress={() => { navigation.navigate('Home') }}>
+                    onPress={() => { navigation.goBack(); }}>
                     <Ionicons name="arrow-back" size={24} color="black" />
                 </TouchableOpacity>
                 <View>

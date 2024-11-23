@@ -13,6 +13,7 @@ const blogController = require('../controllers/blogController')
 const authorize = require('../middlewares/authMiddleware');
 const changePassword = require('../controllers/changePassword')
 const User = require('../models/user');
+const noteController=require('../controllers/noteController')
 // Routes cho User
 router.post('/users', userController.addUser);
 router.get('/users/:id', userController.getUserById);
@@ -76,6 +77,9 @@ router.get('/steps/:userId', stepController.getAllStepsByUser);
 router.post('/sleeps', sleepController.createSleep);
 router.get('/sleeps/:userId/', sleepController.getSleep);
 
+router.post('/note',noteController.addNote)
+router.delete('/note/:id',noteController.deleteNote)
+router.get('/note/:userId',noteController.getNotesByUser)
 // Routes cho Nutrition
 router.post('/nutritions', nutritionController.createNutrition);
 router.get('/nutritions/:userId/:date', nutritionController.getNutrition);

@@ -12,16 +12,16 @@ const AllData = ({ navigation }) => {
         <View style={{ flex: 1,padding:10, backgroundColor: '#fafafb' }}>
             <View style={{ flexDirection: 'row', marginHorizontal: 10 }}>
                 <TouchableOpacity style={{ width: '30%', justifyContent: 'center' }}
-                    onPress={() => { navigation.navigate('Home') }}>
+                    onPress={() => { navigation.goBack(); }}>
                     <Ionicons name="arrow-back" size={24} color="black" />
                 </TouchableOpacity>
                 <View style={{ width: '70%' }}>
-                    <Text style={{ fontSize: 20, fontWeight: 'bold' }}>All Health Data</Text>
+                    <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Tools Health Data</Text>
                 </View>
 
             </View>
             <ScrollView style={{ marginTop: 15 }}>
-                <TouchableOpacity style={{ paddingVertical: 20, paddingHorizontal: 10, marginHorizontal: 10, flexDirection: 'row', borderWidth: 2, borderRadius: 10, backgroundColor: 'white', borderColor: '#f4f4f5' }}>
+                {/* <TouchableOpacity style={{ paddingVertical: 20, paddingHorizontal: 10, marginHorizontal: 10, flexDirection: 'row', borderWidth: 2, borderRadius: 10, backgroundColor: 'white', borderColor: '#f4f4f5' }}>
                     <View style={{ width: '15%', borderRadius: 10, justifyContent: 'center', alignItems: 'center', backgroundColor: '#00bdd6' }}>
                         <FontAwesome name="bullseye" size={24} color="white" />
                     </View>
@@ -32,62 +32,68 @@ const AllData = ({ navigation }) => {
                     <View style={{ width: '8%', justifyContent: 'center', alignItems: 'center' }}>
                         <AntDesign name="right" size={15} color="black" />
                     </View>
-                </TouchableOpacity>
-                <TouchableOpacity style={{ marginTop:15,paddingVertical: 20, paddingHorizontal: 10, marginHorizontal: 10, flexDirection: 'row', borderWidth: 2, borderRadius: 10, backgroundColor: 'white', borderColor: '#f4f4f5' }}>
+                </TouchableOpacity> */}
+                <TouchableOpacity style={{ marginTop:15,paddingVertical: 20, paddingHorizontal: 10, marginHorizontal: 10, flexDirection: 'row', borderWidth: 2, borderRadius: 10, backgroundColor: 'white', borderColor: '#f4f4f5' }}
+                onPress={() => { navigation.navigate('StepTracker') }}>
                     <View style={{ width: '15%', borderRadius: 10, justifyContent: 'center', alignItems: 'center', backgroundColor: '#ed7d2d' }}>
                         <Ionicons name="footsteps" size={24} color="white" />
                     </View>
                     <View style={{ width: '77%', gap: 8, marginLeft: 10 }}>
-                        <Text>Step</Text>
-                        <Text style={{ fontStyle: 25, fontWeight: 'bold' }}>11,875 steps</Text>
+                        <Text style={{ fontStyle: 25, fontWeight: 'bold' }}>Step</Text>
+                        <Text style={{ fontStyle: 25}}>
+                        Follow the movement</Text>
                     </View>
                     <View style={{ width: '8%', justifyContent: 'center', alignItems: 'center' }}>
                         <AntDesign name="right" size={15} color="black" />
                     </View>
                 </TouchableOpacity>
-                <TouchableOpacity style={{marginTop:15, paddingVertical: 20, paddingHorizontal: 10, marginHorizontal: 10, flexDirection: 'row', borderWidth: 2, borderRadius: 10, backgroundColor: 'white', borderColor: '#f4f4f5' }}>
+                <TouchableOpacity style={{marginTop:15, paddingVertical: 20, paddingHorizontal: 10, marginHorizontal: 10, flexDirection: 'row', borderWidth: 2, borderRadius: 10, backgroundColor: 'white', borderColor: '#f4f4f5' }}
+                onPress={() => { navigation.navigate('CycleTracking') }}>
                     <View style={{ width: '15%', borderRadius: 10, justifyContent: 'center', alignItems: 'center', backgroundColor: '#8353e2' }}>
                         <MaterialCommunityIcons name="calendar-month-outline" size={24} color="white" />
                     </View>
                     <View style={{ width: '77%', gap: 8, marginLeft: 10 }}>
-                        <Text>Cycle tracking</Text>
-                        <Text style={{ fontStyle: 25, fontWeight: 'bold' }}>08 April</Text>
+                        <Text style={{ fontStyle: 25, fontWeight: 'bold' }}>Cycle tracking</Text>
+                        <Text style={{ fontStyle: 25}}>Follow the menstrual cycle</Text>
                     </View>
                     <View style={{ width: '8%', justifyContent: 'center', alignItems: 'center' }}>
                         <AntDesign name="right" size={15} color="black" />
                     </View>
                 </TouchableOpacity>
-                <TouchableOpacity style={{marginTop:15, paddingVertical: 20, paddingHorizontal: 10, marginHorizontal: 10, flexDirection: 'row', borderWidth: 2, borderRadius: 10, backgroundColor: 'white', borderColor: '#f4f4f5' }}>
+                <TouchableOpacity style={{marginTop:15, paddingVertical: 20, paddingHorizontal: 10, marginHorizontal: 10, flexDirection: 'row', borderWidth: 2, borderRadius: 10, backgroundColor: 'white', borderColor: '#f4f4f5' }}
+                onPress={() => { navigation.navigate('SleepTracker') }}>
                     <View style={{ width: '15%', borderRadius: 10, justifyContent: 'center', alignItems: 'center', backgroundColor: '#e05858' }}>
                     <MaterialCommunityIcons name="power-sleep" size={24} color="white" />
                     </View>
                     <View style={{ width: '77%', gap: 8, marginLeft: 10 }}>
-                        <Text>Sleep</Text>
-                        <Text style={{ fontStyle: 25, fontWeight: 'bold' }}>7h 31 min</Text>
+                        <Text style={{ fontStyle: 25, fontWeight: 'bold' }}>Sleep</Text>
+                        <Text style={{ fontStyle: 25}}>Help you sleep more scientifically</Text>
                     </View>
                     <View style={{ width: '8%', justifyContent: 'center', alignItems: 'center' }}>
                         <AntDesign name="right" size={15} color="black" />
                     </View>
                 </TouchableOpacity>
-                <TouchableOpacity style={{marginTop:15, paddingVertical: 20, paddingHorizontal: 10, marginHorizontal: 10, flexDirection: 'row', borderWidth: 2, borderRadius: 10, backgroundColor: 'white', borderColor: '#f4f4f5' }}>
+                <TouchableOpacity style={{marginTop:15, paddingVertical: 20, paddingHorizontal: 10, marginHorizontal: 10, flexDirection: 'row', borderWidth: 2, borderRadius: 10, backgroundColor: 'white', borderColor: '#f4f4f5' }}
+                 onPress={() => { navigation.navigate('HeartRateChecker') }}>
                     <View style={{ width: '15%', borderRadius: 10, justifyContent: 'center', alignItems: 'center', backgroundColor: '#de3b40' }}>
                     <FontAwesome5 name="heartbeat" size={24} color="white" />
                     </View>
                     <View style={{ width: '77%', gap: 8, marginLeft: 10 }}>
-                        <Text>Heart</Text>
-                        <Text style={{ fontStyle: 25, fontWeight: 'bold' }}>68 BPM</Text>
+                        <Text style={{ fontStyle: 25, fontWeight: 'bold' }}>Heart</Text>
+                        <Text style={{ fontStyle: 25 }}>Follow your heart rate</Text>
                     </View>
                     <View style={{ width: '8%', justifyContent: 'center', alignItems: 'center' }}>
                         <AntDesign name="right" size={15} color="black" />
                     </View>
                 </TouchableOpacity>
-                <TouchableOpacity style={{marginTop:15, paddingVertical: 20, paddingHorizontal: 10, marginHorizontal: 10, flexDirection: 'row', borderWidth: 2, borderRadius: 10, backgroundColor: 'white', borderColor: '#f4f4f5' }}>
+                <TouchableOpacity style={{marginTop:15, paddingVertical: 20, paddingHorizontal: 10, marginHorizontal: 10, flexDirection: 'row', borderWidth: 2, borderRadius: 10, backgroundColor: 'white', borderColor: '#f4f4f5' }}
+                onPress={() => { navigation.navigate('BMIScreen') }}>
                     <View style={{ width: '15%', borderRadius: 10, justifyContent: 'center', alignItems: 'center', backgroundColor: '#00bdd6' }}>
                     <Ionicons name="body" size={24} color="white" />
                     </View>
                     <View style={{ width: '77%', gap: 8, marginLeft: 10 }}>
-                        <Text>Body mass index</Text>
-                        <Text style={{ fontStyle: 25, fontWeight: 'bold' }}>18,69 BMI</Text>
+                        <Text style={{ fontStyle: 25, fontWeight: 'bold' }}>Body mass index</Text>
+                        <Text style={{ fontStyle: 25 }}>BMI</Text>
                     </View>
                     <View style={{ width: '8%', justifyContent: 'center', alignItems: 'center' }}>
                         <AntDesign name="right" size={15} color="black" />

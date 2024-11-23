@@ -1,11 +1,10 @@
-import { View, Text, Image, ScrollView, TouchableOpacity, FlatList } from 'react-native'
+import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet } from 'react-native'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Entypo from '@expo/vector-icons/Entypo';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Feather from '@expo/vector-icons/Feather';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
-import AntDesign from '@expo/vector-icons/AntDesign';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState, useEffect } from 'react';
 import moment from 'moment';
@@ -17,6 +16,7 @@ const Home = ({ navigation }) => {
     const [sleepData, setSleepData] = useState("0h 0 min");
     const [steps, setSteps] = useState(0);
     const [stepWeek, setStepWeek] = useState(0);
+    const [currentUserName, setCurrentUserName] = useState('')
     //One day
     const [proteinData, setProteinData] = useState(0);
     const [carbData, setCarbData] = useState(0);
@@ -25,7 +25,7 @@ const Home = ({ navigation }) => {
     const [proteinDataWeek, setProteinDataWeek] = useState(0);
     const [carbDataWeek, setCarbDataWeek] = useState(0);
     const [fatDataWeek, setFatDataWeek] = useState(0);
-   
+
     const [cycleData, setCycleData] = useState([]);
     const [sleepWeek, setSleepWeek] = useState("0h 0 min");
     const [daysUntilNextPeriod, setDaysUntilNextPeriod] = useState(null);
@@ -51,6 +51,7 @@ const Home = ({ navigation }) => {
             if (currentUser) {
                 const parsedUser = JSON.parse(currentUser);
                 setUser(parsedUser);
+                setCurrentUserName(parsedUser.name)
                 console.log(parsedUser.avatar)
                 if (parsedUser.avatar === null) {
                     setAvatar(null);
@@ -213,18 +214,18 @@ const Home = ({ navigation }) => {
             // Lấy ngày đầu tuần (Chủ Nhật) và cuối tuần (Thứ Bảy)
             const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay())); // Chủ nhật
             const endOfWeek = new Date(today.setDate(today.getDate() + 6)); // Thứ bảy
-    
+
             // Chuyển ngày đầu tuần và cuối tuần thành định dạng YYYY-MM-DD
             const startDate = startOfWeek.toISOString().split('T')[0];
             const endDate = endOfWeek.toISOString().split('T')[0];
-    
+
             console.log("Tuần này từ: ", startDate, " đến: ", endDate);
-    
+
             // Lấy tất cả dữ liệu dinh dưỡng của user từ API
             const response = await fetch(`http://localhost:3000/api/nutritions/${userId}`);
             const data = await response.json();
             console.log("Dữ liệu từ API:", data);
-    
+
             // Kiểm tra nếu dữ liệu trả về hợp lệ
             if (data.nutrition && Array.isArray(data.nutrition) && data.nutrition.length > 0) {
                 // Lọc các bản ghi dinh dưỡng trong tuần này
@@ -232,7 +233,7 @@ const Home = ({ navigation }) => {
                     const mealDate = moment(meal.date); // Giả sử meal.date là kiểu YYYY-MM-DD
                     return mealDate.isBetween(startDate, endDate, 'day', '[]'); // Kiểm tra xem bữa ăn có nằm trong tuần này không
                 });
-    
+
                 // Tính tổng dinh dưỡng từ các bữa ăn trong tuần
                 const totalNutrition = nutritionThisWeek.reduce(
                     (totals, meal) => ({
@@ -242,7 +243,7 @@ const Home = ({ navigation }) => {
                     }),
                     { protein: 0, carbs: 0, fats: 0 } // Giá trị khởi tạo
                 );
-    
+
                 // Cập nhật dữ liệu vào các state
                 setProteinDataWeek(totalNutrition.protein);
                 setCarbDataWeek(totalNutrition.carbs);
@@ -254,11 +255,11 @@ const Home = ({ navigation }) => {
             console.error('Lỗi khi gọi API:', error);
         }
     };
-    
+
     // Tính tổng calo cho tuần
     const totalKcalWeek = fatDataWeek * 9 + proteinDataWeek * 4 + carbDataWeek * 4;
-    
-    
+
+
     const fetchNutritions = async (userId) => {
         try {
             const today = new Date().toISOString().split('T')[0];
@@ -317,32 +318,43 @@ const Home = ({ navigation }) => {
     return (
         <View style={{ flex: 1, backgroundColor: '#fafafb', justifyContent: 'space-between', }}>
 
-            <View style={{ flexDirection: 'row', marginHorizontal: 15, justifyContent: 'space-between' }}>
-                <TouchableOpacity
-                    style={{ justifyContent: 'center' }}
-                    onPress={() => { navigation.navigate('Laugh') }}
-                >
-                    <Ionicons name="arrow-back" size={24} color="black" />
-                </TouchableOpacity>
+            <View style={{ flexDirection: 'row', marginHorizontal: 15, justifyContent: 'space-between', alignItems: 'center' }}>
+                <View style={{ flexDirection: 'column' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Text style={{ fontSize: 20 }}>Hi</Text>
+                        <Text style={{ marginHorizontal: 5, fontSize: 20, fontWeight: 'bold' }}>{currentUserName}</Text>
+                        <FontAwesome6 name="hand-peace" size={20} color="black" />
+                    </View>
+                    <View>
+                        <Text style={{ fontStyle: 'italic' }}>Wish you a very active day!</Text>
+                    </View>
+                </View>
+
 
                 <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
                     <TouchableOpacity onPress={() => { navigation.navigate('MyAbout') }}>
-                        <Image style={{ height: 70, width: 70, borderRadius: 50 }}
-                            source={
-                                avatar
-                                    ? { uri: avatar }
-                                    : gender === 'male'
-                                        ? require('../assets/data/male.png')
-                                        : require('../assets/data/female.png')
-                            }
-                        />
+                        {/* Nền trang trí */}
+                        <View style={styles.avatarContainer}>
+                            {/* Avatar */}
+                            <Image
+                                style={styles.avatarImage}
+                                source={
+                                    avatar
+                                        ? { uri: avatar }
+                                        : gender === 'male'
+                                            ? require('../assets/data/male.png')
+                                            : require('../assets/data/female.png')
+                                }
+                            />
+                            {/* Badge trạng thái */}
+                            <View style={styles.statusBadge} />
+                        </View>
                     </TouchableOpacity>
-
                 </View>
             </View>
 
             <ScrollView style={{ height: 900, flex: 1 }}>
-                <View style={{ marginHorizontal: 15, flexDirection: 'row', alignItems: 'center' }}>
+                <View style={{ marginVertical: 20, marginHorizontal: 15, flexDirection: 'row', alignItems: 'center' }}>
                     <Ionicons name="sunny-sharp" size={24} color="black" />
                     <Text style={{ marginLeft: 10, }}>{currentDate}</Text>
                 </View>
@@ -352,8 +364,9 @@ const Home = ({ navigation }) => {
                     </View>
                     <TouchableOpacity style={{ flexDirection: 'row', width: '25%', alignItems: 'flex-end', borderWidth: 1, borderRadius: 15, borderColor: '#4bcfe0', paddingVertical: 10, paddingHorizontal: 5, justifyContent: 'center' }}
                         onPress={() => { navigation.navigate('AllData') }}>
-                        <FontAwesome6 name="database" size={20} color="#4bcfe0" />
-                        <Text style={{ marginLeft: 5, color: '#4bcfe0', fontWeight: 'bold' }}>All data</Text>
+                        <Entypo name="tools" size={20} color="#4bcfe0" />
+
+                        <Text style={{ marginLeft: 5, color: '#4bcfe0', fontWeight: 'bold',fontSize:18 }}>Tools</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={{ marginVertical: 10, marginHorizontal: 15, flexDirection: 'row', backgroundColor: '#ebfdff', borderRadius: 10, }}>
@@ -361,15 +374,15 @@ const Home = ({ navigation }) => {
                         <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Health Score</Text>
                         <Text style={{ color: '#7c8689' }}>Based on your overview</Text>
                         <Text style={{ color: '#7c8689' }}>health tracking, your score is</Text>
-                        <Text style={{ color: '#7c8689' }}>78 and consider good...</Text>
-                        <TouchableOpacity style={{ flexDirection: 'row', marginTop: 5 }}>
+                        <Text style={{ color: '#7c8689' }}>100 and good...</Text>
+                        {/* <TouchableOpacity style={{ flexDirection: 'row', marginTop: 5 }}>
                             <Text style={{ color: '#35cbdf', fontWeight: 'bold' }}>Tell me more</Text>
                             <Entypo name="controller-play" size={18} color="#35cbdf" />
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
                     </View>
                     <View style={{ width: '30%', }}>
                         <View style={{ borderBottomLeftRadius: 30, borderBottomEndRadius: 30, backgroundColor: '#8353e2', width: '70%', paddingVertical: 30, alignItems: 'center' }}>
-                            <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold' }}>78</Text></View>
+                            <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold' }}>100</Text></View>
                     </View>
                 </View>
                 <View style={{ marginHorizontal: 15, flexDirection: 'row' }}>
@@ -438,11 +451,11 @@ const Home = ({ navigation }) => {
                     <TouchableOpacity style={{ paddingHorizontal: 10, width: '48%', borderRadius: 10, paddingVertical: 15, borderWidth: 1, borderColor: '#f5f5f6', backgroundColor: 'white' }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
                             <Ionicons name="footsteps" size={24} color="red" />
-                            <Text>Steps</Text>
+                            <Text>Walk</Text>
                         </View>
                         <View style={{ marginHorizontal: 5, gap: 5, paddingVertical: 15 }}>
 
-                            <Text style={{ fontWeight: 'bold', fontSize: 20 }}>{stepWeek}</Text>
+                            <Text style={{ fontWeight: 'bold', fontSize: 20 }}>{stepWeek} steps</Text>
 
                         </View>
                     </TouchableOpacity>
@@ -459,7 +472,7 @@ const Home = ({ navigation }) => {
                     </TouchableOpacity>
                 </View>
                 <View style={{ gap: 15, flexDirection: 'row', marginHorizontal: 15, marginTop: 10 }}>
-                    <TouchableOpacity style={{ paddingHorizontal: 10, width: '48%', borderRadius: 10, paddingVertical: 15, borderWidth: 1, borderColor: '#f5f5f6', backgroundColor: 'white' }}>
+                    {/* <TouchableOpacity style={{ paddingHorizontal: 10, width: '48%', borderRadius: 10, paddingVertical: 15, borderWidth: 1, borderColor: '#f5f5f6', backgroundColor: 'white' }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
                             <Ionicons name="water" size={24} color="#00bcf2" />
                             <Text>Water</Text>
@@ -469,7 +482,7 @@ const Home = ({ navigation }) => {
                             <Text style={{ fontWeight: 'bold', fontSize: 20 }}>10,689 ml</Text>
 
                         </View>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                     <TouchableOpacity style={{ paddingHorizontal: 10, width: '48%', borderRadius: 10, paddingVertical: 15, borderWidth: 1, borderColor: '#f5f5f6', backgroundColor: 'white' }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
                             <MaterialCommunityIcons name="sleep" size={24} color="black" />
@@ -508,5 +521,38 @@ const Home = ({ navigation }) => {
 
     )
 }
+const styles = StyleSheet.create({
+    avatarContainer: {
+        height: 80,
+        width: 80,
+        borderRadius: 40, // Hình tròn
+        backgroundColor: '#e0f7fa', // Màu nền trang trí (nhạt)
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000', // Đổ bóng
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 5, // Bóng trên Android
+    },
+    avatarImage: {
+        height: 70,
+        width: 70,
+        borderRadius: 35, // Bo tròn ảnh
+        borderWidth: 2, // Viền
+        borderColor: '#00796b', // Màu viền (xanh đậm)
+    },
+    statusBadge: {
+        position: 'absolute',
+        bottom: 5,
+        right: 5,
+        height: 15,
+        width: 15,
+        borderRadius: 7.5,
+        backgroundColor: '#4caf50', // Màu xanh lá (online)
+        borderWidth: 2,
+        borderColor: '#fff', // Viền trắng xung quanh badge
+    },
+});
 
 export default Home;

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity,Modal,TextInput } from 'react-native';
 import Svg, { Rect, G, Text as SvgText } from 'react-native-svg';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -11,7 +11,11 @@ const SleepTracker = ({ navigation }) => {
     const [sleepData, setSleepData] = useState([]);
     const [averageSleepTime, setAverageSleepTime] = useState("0h 0 min");
     const [sleepRate, setSleepRate] = useState("0%");
+    const [isModalVisible, setModalVisible] = useState(false);
+    const [bedTime, setBedTime] = useState('22:00');
+    const [wakeUpTime, setWakeUpTime] = useState('07:30');
     const [user, setUser] = useState(null);
+    const [errorMessage, setErrorMessage] = useState('');
     useEffect(() => {
         getUserData();
     }, []);
@@ -110,13 +114,23 @@ const SleepTracker = ({ navigation }) => {
     });
     
     
-    
+    const handleSave = () => {
+        const timePattern = /^([01]?[0-9]|2[0-3]):([0-5]?[0-9])$/;
+        
+        if (!timePattern.test(bedTime) || !timePattern.test(wakeUpTime)) {
+            setErrorMessage('Please enter valid time in HH:mm format');
+        } else {
+            setErrorMessage('');
+            // Update the schedule logic
+            setModalVisible(false);
+        }
+    };
 
     return (
         <View style={styles.container}>
             <View style={{ flexDirection: 'row' }}>
                 <TouchableOpacity style={{ width: '43%', justifyContent: 'center' }}
-                    onPress={() => { navigation.navigate('Home') }}>
+                     onPress={() => { navigation.goBack(); }}>
                     <Ionicons name="arrow-back" size={24} color="black" />
                 </TouchableOpacity>
                 <View>
@@ -175,7 +189,7 @@ const SleepTracker = ({ navigation }) => {
                 </Svg>
             </View>
 
-            <View style={{ gap: 10, flexDirection: 'row', marginVertical: 10, marginHorizontal: 10 }}>
+            {/* <View style={{ gap: 10, flexDirection: 'row', marginVertical: 10, marginHorizontal: 10 }}>
                 <TouchableOpacity style={{ width: '49%', alignItems: 'center', borderRadius: 20, borderWidth: 2, borderColor: '#f6f6f7', paddingVertical: 5 }}>
                     <View style={{ paddingVertical: 5, flexDirection: 'row', alignItems: 'center' }}>
                         <MaterialIcons name="star-rate" size={24} color="#fce100" />
@@ -196,10 +210,11 @@ const SleepTracker = ({ navigation }) => {
                         <Text style={{ fontSize: 13 }}>insights</Text>
                     </View>
                 </TouchableOpacity>
-            </View>
+            </View> */}
             <View style={{ marginHorizontal: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Set your schedule</Text>
-                <TouchableOpacity><Text style={{ color: '#4dd6e5', fontSize: 15, fontWeight: 'bold' }}>Edit</Text></TouchableOpacity>
+                <TouchableOpacity><Text style={{ color: '#4dd6e5', fontSize: 15, fontWeight: 'bold' }}
+                onPress={()=>setModalVisible(true)}>Edit</Text></TouchableOpacity>
             </View>
             <View style={{ gap: 10, flexDirection: 'row', marginVertical: 10, marginHorizontal: 10 }}>
                 <TouchableOpacity style={{ paddingLeft: 10, width: '49%', borderRadius: 20, paddingVertical: 5, backgroundColor: '#e05858' }}>
@@ -209,7 +224,7 @@ const SleepTracker = ({ navigation }) => {
                     </View>
                     <View style={{ flexDirection: 'row', gap: 5 }}>
 
-                        <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'white' }}>22:00</Text>
+                        <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'white' }}>{bedTime}</Text>
                         <Text style={{ fontSize: 20, color: 'white' }}>pm</Text>
                     </View>
                 </TouchableOpacity>
@@ -220,11 +235,37 @@ const SleepTracker = ({ navigation }) => {
                     </View>
                     <View style={{ flexDirection: 'row', gap: 5 }}>
 
-                        <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'white' }}>07:30</Text>
+                        <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'white' }}>{wakeUpTime}</Text>
                         <Text style={{ fontSize: 20, color: 'white' }}>am</Text>
                     </View>
                 </TouchableOpacity>
             </View>
+            <Modal visible={isModalVisible}>
+                <View style={styles.modalContent}>
+                    <Text style={styles.modalTitle}>Edit Sleep Schedule</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={bedTime}
+                        onChangeText={setBedTime}
+                        placeholder="Bed Time"
+                        keyboardType="numeric"
+                    />
+                    <TextInput
+                        style={styles.input}
+                        value={wakeUpTime}
+                        onChangeText={setWakeUpTime}
+                        placeholder="Wake Up Time"
+                        keyboardType="numeric"
+                    />
+                    {errorMessage ? <Text style={{color:'red'}}>{errorMessage}</Text> : null}
+                    <TouchableOpacity onPress={handleSave} style={styles.saveButton}>
+                        <Text style={styles.saveButtonText}>Save</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.cancelButton}>
+                        <Text style={styles.cancelButtonText}>Cancel</Text>
+                    </TouchableOpacity>
+                </View>
+            </Modal>
         </View>
     );
 };
@@ -246,6 +287,48 @@ const styles = StyleSheet.create({
         marginLeft: 5,
         color: '#00c0d8',
         fontWeight: 'bold'
+    },
+    modalContent: {
+        backgroundColor: 'white',
+        padding: 20,
+        borderRadius: 10,
+        alignItems: 'center',
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
+    input: {
+        width: '80%',
+        height: 40,
+        borderColor: '#ccc',
+        borderWidth: 1,
+        borderRadius: 5,
+        marginBottom: 10,
+        paddingLeft: 10,
+    },
+    saveButton: {
+        backgroundColor: '#4CAF50',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 5,
+        marginTop: 10,
+    },
+    saveButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
+    },
+    cancelButton: {
+        backgroundColor: '#f44336',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 5,
+        marginTop: 10,
+    },
+    cancelButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
     },
 });
 

@@ -193,7 +193,7 @@ const MyAbout = ({ navigation }) => {
             <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', marginBottom: 20 }}>
                 <TouchableOpacity
                     style={{ width: '10%', justifyContent: 'center' }}
-                    onPress={() => navigation.navigate('Home')}
+                    onPress={() => { navigation.goBack(); }}
                 >
                     <Ionicons name="arrow-back" size={24} color="black" />
                 </TouchableOpacity>

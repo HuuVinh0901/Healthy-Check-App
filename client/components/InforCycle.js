@@ -109,7 +109,7 @@ const InforCycle = ({ navigation }) => {
         <View style={{ flex: 1, paddingHorizontal: 10, backgroundColor: '#fff', }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
                 <TouchableOpacity style={{ width: '30%', justifyContent: 'center' }}
-                    onPress={() => { navigation.navigate('CycleTracking') }}>
+                    onPress={() => { navigation.goBack(); }}>
                     <Ionicons name="arrow-back" size={24} color="black" />
                 </TouchableOpacity>
                 <View style={{ justifyContent: 'center' }}>

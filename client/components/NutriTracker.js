@@ -93,7 +93,7 @@ const NutritionTracker = ({ navigation }) => {
         <View style={styles.container}>
             <View style={{ flexDirection: 'row' }}>
                 <TouchableOpacity style={{ width: '40%', justifyContent: 'center' }}
-                    onPress={() => { navigation.navigate('Home') }}>
+                    onPress={() => { navigation.goBack(); }}>
                     <Ionicons name="arrow-back" size={24} color="black" />
                 </TouchableOpacity>
                 <View>

@@ -82,7 +82,7 @@ const CycleTrackingScreen = ({ navigation }) => {
     <ScrollView style={styles.container}>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <TouchableOpacity style={{ width: '30%', justifyContent: 'center' }}
-          onPress={() => { navigation.navigate('Home') }}>
+          onPress={() => { navigation.goBack(); }}>
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
         <View style={{ width: '50%' }}>
