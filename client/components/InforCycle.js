@@ -164,25 +164,26 @@ const InforCycle = ({ navigation }) => {
             </TouchableOpacity>
             <Text style={{ fontSize: 20, fontWeight: 'bold', marginVertical: 10 }}>YOUR CYCLE LIST</Text>
             <ScrollView style={styles.cycleListContainer}>
-                {cycleData.map((cycle, index) => (
-                    <View key={index} style={styles.cycleCard}>
-                        <View>
-                            <Text style={styles.cycleText}>Start date: {new Date(cycle.startDate).toLocaleDateString()}</Text>
-                            <Text style={styles.cycleText}>End date: {new Date(cycle.endDate).toLocaleDateString()}</Text>
-                            <Text style={styles.cycleText}>Cycle length: {cycle.cycleLength} days</Text>
+                {Array.isArray(cycleData) && cycleData.length > 0 ? (
+                    cycleData.map((cycle, index) => (
+                        <View key={index} style={styles.cycleCard}>
+                            <View>
+                                <Text style={styles.cycleText}>Ngày bắt đầu: {new Date(cycle.startDate).toLocaleDateString()}</Text>
+                                <Text style={styles.cycleText}>Ngày kết thúc: {new Date(cycle.endDate).toLocaleDateString()}</Text>
+                                <Text style={styles.cycleText}>Thời gian chu kỳ: {cycle.cycleLength} ngày</Text>
+                            </View>
+                            <View style={styles.buttonContainer}>
+                                <TouchableOpacity style={styles.deleteButton} onPress={() => confirmDeleteCycle(cycle)}>
+                                    <AntDesign name="delete" size={20} color="white" />
+                                </TouchableOpacity>
+                            </View>
                         </View>
-
-                        <View style={styles.buttonContainer}>
-                            {/* <TouchableOpacity style={styles.editButton}>
-                                <AntDesign name="edit" size={20} color="white" />
-                            </TouchableOpacity> */}
-                            <TouchableOpacity style={styles.deleteButton} onPress={() => confirmDeleteCycle(cycle)}>
-                                <AntDesign name="delete" size={20} color="white" />
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                ))}
+                    ))
+                ) : (
+                    <Text>No data</Text>
+                )}
             </ScrollView>
+
             <Modal
                 transparent={true}
                 animationType="fade"

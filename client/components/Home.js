@@ -14,33 +14,32 @@ const Home = ({ navigation }) => {
     const [currentDate, setCurrentDate] = useState('');
     const [user, setUser] = useState(null);
     const [currentDateCycle, setCurrentDateCycle] = useState(new Date());
-    const [blogs, setBlogs] = useState([]);
+    const [sleepData, setSleepData] = useState("0h 0 min");
     const [steps, setSteps] = useState(0);
     const [stepWeek, setStepWeek] = useState(0);
-    const [kcal, setKcal] = useState(0);
+    //One day
+    const [proteinData, setProteinData] = useState(0);
+    const [carbData, setCarbData] = useState(0);
+    const [fatData, setFatData] = useState(0);
+    //Week
+    const [proteinDataWeek, setProteinDataWeek] = useState(0);
+    const [carbDataWeek, setCarbDataWeek] = useState(0);
+    const [fatDataWeek, setFatDataWeek] = useState(0);
+   
     const [cycleData, setCycleData] = useState([]);
-    const [totalSleepTime, setTotalSleepTime] = useState(0);
+    const [sleepWeek, setSleepWeek] = useState("0h 0 min");
     const [daysUntilNextPeriod, setDaysUntilNextPeriod] = useState(null);
     const [gender, setGender] = useState('')
     const [avatar, setAvatar] = useState(null);
     useEffect(() => {
         getCurrentDate()
         getUserData();
-        fetchBlogs()
     }, []);
     useEffect(() => {
         if (cycleData.length > 0) {
             calculateDaysUntilNextPeriod();
         }
     }, [cycleData]);
-    const fetchBlogs = async () => {
-        try {
-            const response = await axios.get('http://localhost:3000/api/blog');
-            setBlogs(response.data);
-        } catch (error) {
-            console.error('Error fetching blogs:', error);
-        }
-    };
     const getCurrentDate = () => {
         const date = new Date();
         const options = { weekday: 'short', day: 'numeric', month: 'short' }; // Format: "TUES 11 JUL"
@@ -53,21 +52,114 @@ const Home = ({ navigation }) => {
                 const parsedUser = JSON.parse(currentUser);
                 setUser(parsedUser);
                 console.log(parsedUser.avatar)
-                const imageUrl = `http://localhost:3000${parsedUser.avatar}`;
-                setAvatar(imageUrl);
+                if (parsedUser.avatar === null) {
+                    setAvatar(null);
+                }
+                else {
+                    const imageUrl = `http://localhost:3000${parsedUser.avatar}`;
+                    setAvatar(imageUrl)
+                }
                 fetchSteps(parsedUser.id)
                 fetchStepsWeek(parsedUser.id)
                 fetchNutritions(parsedUser.id)
                 fetchCycleData(parsedUser.id)
                 fetchSleepData(parsedUser.id)
                 setGender(parsedUser.gender)
-                setCurrentUserName(parsedUser.name)
-                
+                fetchSleepDataWeek(parsedUser.id)
+                fetchNutritionsWeek(parsedUser.id)
             }
         } catch (error) {
             console.error('Error fetching user data', error);
         }
     };
+    const fetchSleepData = async (userId) => {
+        try {
+            const response = await fetch(`http://localhost:3000/api/sleeps/${userId}`);
+            const data = await response.json();
+
+            // Lọc dữ liệu giấc ngủ trong ngày hôm nay
+            if (Array.isArray(data)) {
+                const today = moment().format('YYYY-MM-DD'); // Ngày hôm nay
+
+                // Lọc các bản ghi giấc ngủ của ngày hôm nay
+                const sleepToday = data.filter((sleepRecord) => sleepRecord.date === today);
+
+                if (sleepToday.length > 0) {
+                    const { bedTime, wakeUp } = sleepToday[0]; // Giả sử chỉ có một bản ghi giấc ngủ trong ngày hôm nay
+
+                    const bedTimeMoment = moment(bedTime, 'HH:mm'); // Chuyển đổi thời gian vào giờ phút
+                    let wakeUpMoment = moment(wakeUp, 'HH:mm');
+
+                    // Nếu giờ thức dậy nhỏ hơn giờ đi ngủ, nghĩa là thức dậy vào ngày hôm sau
+                    if (wakeUpMoment.isBefore(bedTimeMoment)) {
+                        wakeUpMoment = wakeUpMoment.add(1, 'days'); // Thêm 1 ngày vào thời gian thức dậy
+                    }
+
+                    // Tính chênh lệch giữa thời gian thức dậy và giờ đi ngủ
+                    const duration = moment.duration(wakeUpMoment.diff(bedTimeMoment));
+
+                    // Lấy ra số giờ, phút, giây
+                    const hours = duration.hours();
+                    const minutes = duration.minutes();
+                    console.log("Giờ: " + hours);
+                    console.log("Phút: " + minutes);
+                    setSleepData(`${hours}h ${minutes} min`);
+                } else {
+                    console.log("Không có dữ liệu giấc ngủ hôm nay.");
+                }
+            }
+        } catch (error) {
+            console.error('Lỗi khi gọi API:', error);
+        }
+    };
+
+
+    const fetchSleepDataWeek = async (userId) => {
+        try {
+            const response = await fetch(`http://localhost:3000/api/sleeps/${userId}`);
+            const data = await response.json();
+
+            if (Array.isArray(data)) {
+                const currentDate = moment();
+                const startOfWeek = currentDate.clone().startOf('week');
+                const endOfWeek = currentDate.clone().endOf('week');
+
+                // Lọc dữ liệu giấc ngủ trong tuần hiện tại
+                const sleepsThisWeek = data.filter((sleepRecord) => {
+                    const sleepDate = moment(sleepRecord.date);
+                    return sleepDate.isBetween(startOfWeek, endOfWeek, null, '[]');
+                });
+
+                // Tính tổng số giờ và phút ngủ trong tuần
+                const totalSleepTimeThisWeek = sleepsThisWeek.reduce((total, sleepRecord) => {
+                    const bedTime = moment(sleepRecord.bedTime, 'HH:mm');
+                    const wakeUpTime = moment(sleepRecord.wakeUp, 'HH:mm');
+
+                    // Nếu giờ thức dậy trước giờ đi ngủ (ví dụ: ngủ qua đêm), cộng thêm 1 ngày
+                    let sleepDuration = wakeUpTime.diff(bedTime, 'minutes'); // Tính theo phút
+
+                    // Nếu giấc ngủ qua đêm (thức dậy hôm sau), kiểm tra thêm trường hợp chênh lệch giờ qua ngày
+                    if (sleepDuration < 0) {
+                        sleepDuration += 24 * 60; // Cộng thêm 24 giờ nếu thức dậy sau khi đi ngủ, chuyển thành phút
+                    }
+
+                    // Cộng dồn tổng số phút ngủ
+                    return total + sleepDuration;
+                }, 0);
+
+                // Tính số giờ và phút từ tổng số phút
+                const hours = Math.floor(totalSleepTimeThisWeek / 60); // Chia cho 60 để lấy số giờ
+                const minutes = totalSleepTimeThisWeek % 60; // Số phút còn lại
+                setSleepWeek(`${hours}h ${minutes} min`);
+                console.log(`Tổng số giờ ngủ trong tuần: ${hours} giờ ${minutes} phút`);
+            } else {
+                console.error("Dữ liệu trả về không đúng định dạng mảng:", data);
+            }
+        } catch (error) {
+            console.error('Lỗi khi gọi API:', error);
+        }
+    };
+
     const fetchSteps = async (userId) => {
         try {
             const today = new Date().toISOString().split('T')[0];
@@ -91,42 +183,103 @@ const Home = ({ navigation }) => {
             const response = await fetch(`http://localhost:3000/api/steps/${userId}`); // API cho bước trong ngày hiện tại
             const data = await response.json();
             console.log("Dữ liệu từ API step:", data);
-            const currentDate = moment();
-            const startOfWeek = currentDate.clone().startOf('week');
-            const endOfWeek = currentDate.clone().endOf('week');
 
+            // Kiểm tra xem data có chứa mảng 'steps' hay không
+            if (Array.isArray(data.steps)) {
+                const currentDate = moment();
+                const startOfWeek = currentDate.clone().startOf('week');
+                const endOfWeek = currentDate.clone().endOf('week');
 
-            const stepsThisWeek = data.filter((stepRecord) => {
-                const stepDate = moment(stepRecord.date);
-                return stepDate.isBetween(startOfWeek, endOfWeek, null, '[]');
-            });
+                // Lọc dữ liệu theo tuần
+                const stepsThisWeek = data.steps.filter((stepRecord) => {
+                    const stepDate = moment(stepRecord.date);
+                    return stepDate.isBetween(startOfWeek, endOfWeek, null, '[]');
+                });
 
-            const totalStepsThisWeek = stepsThisWeek.reduce((total, stepRecord) => total + stepRecord.steps, 0);
-            setStepWeek(totalStepsThisWeek);
-            console.log(`Tổng số bước trong tuần: ${totalStepsThisWeek}`);
+                const totalStepsThisWeek = stepsThisWeek.reduce((total, stepRecord) => total + stepRecord.steps, 0);
+                setStepWeek(totalStepsThisWeek);
+                console.log(`Tổng số bước trong tuần: ${totalStepsThisWeek}`);
+            } else {
+                console.error("Dữ liệu trả về không có mảng 'steps':", data);
+            }
 
         } catch (error) {
             console.error('Lỗi khi gọi API:', error);
         }
     };
-
+    const fetchNutritionsWeek = async (userId) => {
+        try {
+            const today = new Date();
+            // Lấy ngày đầu tuần (Chủ Nhật) và cuối tuần (Thứ Bảy)
+            const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay())); // Chủ nhật
+            const endOfWeek = new Date(today.setDate(today.getDate() + 6)); // Thứ bảy
+    
+            // Chuyển ngày đầu tuần và cuối tuần thành định dạng YYYY-MM-DD
+            const startDate = startOfWeek.toISOString().split('T')[0];
+            const endDate = endOfWeek.toISOString().split('T')[0];
+    
+            console.log("Tuần này từ: ", startDate, " đến: ", endDate);
+    
+            // Lấy tất cả dữ liệu dinh dưỡng của user từ API
+            const response = await fetch(`http://localhost:3000/api/nutritions/${userId}`);
+            const data = await response.json();
+            console.log("Dữ liệu từ API:", data);
+    
+            // Kiểm tra nếu dữ liệu trả về hợp lệ
+            if (data.nutrition && Array.isArray(data.nutrition) && data.nutrition.length > 0) {
+                // Lọc các bản ghi dinh dưỡng trong tuần này
+                const nutritionThisWeek = data.nutrition.filter(meal => {
+                    const mealDate = moment(meal.date); // Giả sử meal.date là kiểu YYYY-MM-DD
+                    return mealDate.isBetween(startDate, endDate, 'day', '[]'); // Kiểm tra xem bữa ăn có nằm trong tuần này không
+                });
+    
+                // Tính tổng dinh dưỡng từ các bữa ăn trong tuần
+                const totalNutrition = nutritionThisWeek.reduce(
+                    (totals, meal) => ({
+                        protein: totals.protein + meal.protein,
+                        carbs: totals.carbs + meal.carbs,
+                        fats: totals.fats + meal.fats,
+                    }),
+                    { protein: 0, carbs: 0, fats: 0 } // Giá trị khởi tạo
+                );
+    
+                // Cập nhật dữ liệu vào các state
+                setProteinDataWeek(totalNutrition.protein);
+                setCarbDataWeek(totalNutrition.carbs);
+                setFatDataWeek(totalNutrition.fats);
+            } else {
+                console.log("Không có dữ liệu dinh dưỡng.");
+            }
+        } catch (error) {
+            console.error('Lỗi khi gọi API:', error);
+        }
+    };
+    
+    // Tính tổng calo cho tuần
+    const totalKcalWeek = fatDataWeek * 9 + proteinDataWeek * 4 + carbDataWeek * 4;
+    
+    
     const fetchNutritions = async (userId) => {
         try {
             const today = new Date().toISOString().split('T')[0];
-
+            console.log(today);
             const response = await fetch(`http://localhost:3000/api/nutritions/${userId}/${today}`);
             const data = await response.json();
+            console.log("Dữ liệu từ API:", data);
 
             if (Array.isArray(data) && data.length > 0) {
+                // Tính tổng dinh dưỡng từ tất cả các bữa ăn
                 const totalNutrition = data.reduce(
                     (totals, meal) => ({
-                        calories: totals.calories + meal.calories,
-
+                        protein: totals.protein + meal.protein,
+                        carbs: totals.carbs + meal.carbs,
+                        fats: totals.fats + meal.fats,
                     }),
-                    { calories: 0 } // Giá trị khởi tạo
+                    { protein: 0, carbs: 0, fats: 0 } // Giá trị khởi tạo
                 );
-                setKcal(totalNutrition.calories)
-
+                setProteinData(totalNutrition.protein);
+                setCarbData(totalNutrition.carbs);
+                setFatData(totalNutrition.fats);
             } else {
                 console.log("Không có dữ liệu dinh dưỡng");
             }
@@ -134,6 +287,7 @@ const Home = ({ navigation }) => {
             console.error('Lỗi khi gọi API:', error);
         }
     };
+    const totalKcal = fatData * 9 + proteinData * 4 + carbData * 4;
     const fetchCycleData = async (userId) => {
         try {
             const response = await fetch(`http://localhost:3000/api/cycle/${userId}`);
@@ -160,51 +314,6 @@ const Home = ({ navigation }) => {
     };
 
 
-    const fetchSleepData = async (userId) => {
-        try {
-            const response = await axios.get(`http://localhost:3000/api/sleeps/${userId}`);
-            const sleepData = response.data; // Dữ liệu giấc ngủ lấy từ API
-            const currentDate = moment(); // Ngày hiện tại
-            const startOfWeek = currentDate.clone().startOf('week'); // Bắt đầu tuần (Chủ nhật)
-            const endOfWeek = currentDate.clone().endOf('week'); // Kết thúc tuần (Thứ bảy)
-
-            // Lọc dữ liệu giấc ngủ trong tuần hiện tại
-            const sleepDataThisWeek = sleepData.filter((sleepRecord) => {
-                const sleepDate = moment(sleepRecord.date); // Chuyển đổi date sang moment
-                return sleepDate.isBetween(startOfWeek, endOfWeek, null, '[]'); // Kiểm tra xem ngày có nằm trong tuần hiện tại không
-            });
-
-            // Tính tổng số giờ và phút ngủ trong tuần
-            let totalSleepMinutes = 0; // Lưu tổng số phút ngủ
-
-            sleepDataThisWeek.forEach((sleepRecord) => {
-                const bedTime = moment(sleepRecord.bedTime, 'HH:mm');
-                let wakeUpTime = moment(sleepRecord.wakeUp, 'HH:mm');
-
-                // Nếu thời gian thức dậy nhỏ hơn thời gian đi ngủ (thức dậy vào ngày hôm sau), cộng thêm một ngày vào wakeUpTime
-                if (wakeUpTime.isBefore(bedTime)) {
-                    wakeUpTime = wakeUpTime.add(1, 'days');
-                }
-
-                const minutesSlept = wakeUpTime.diff(bedTime, 'minutes'); // Tính số phút ngủ
-
-                totalSleepMinutes += minutesSlept;
-            });
-
-            // Chuyển đổi tổng số phút thành giờ và phút
-            const totalHours = Math.floor(totalSleepMinutes / 60); // Tính số giờ
-            const remainingMinutes = totalSleepMinutes % 60; // Số phút còn lại
-
-            // Hiển thị tổng số giờ và phút ngủ
-            console.log(`Tổng số giờ ngủ trong tuần: ${totalHours} giờ ${remainingMinutes} phút`);
-            setTotalSleepTime(`${totalHours}h ${remainingMinutes}min`); // Cập nhật state nếu cần
-
-        } catch (error) {
-            console.error('Error fetching sleep data:', error);
-        }
-    };
-
-
     return (
         <View style={{ flex: 1, backgroundColor: '#fafafb', justifyContent: 'space-between', }}>
 
@@ -218,7 +327,7 @@ const Home = ({ navigation }) => {
 
                 <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
                     <TouchableOpacity onPress={() => { navigation.navigate('MyAbout') }}>
-                        <Image style={{ height: 70, width: 70,borderRadius:50 }}
+                        <Image style={{ height: 70, width: 70, borderRadius: 50 }}
                             source={
                                 avatar
                                     ? { uri: avatar }
@@ -267,21 +376,17 @@ const Home = ({ navigation }) => {
                     <View style={{ width: '50%' }}>
                         <Text style={{ fontSize: 25, fontWeight: 'bold' }}>Highlights</Text>
                     </View>
-                    {/* <TouchableOpacity style={{ width: '50%', justifyContent: 'flex-end', flexDirection: 'row', alignItems: 'center' }}>
-                        <Text style={{ marginRight: 2, color: '#a4a7ad' }}>View more</Text>
-                        <Entypo name="controller-play" size={18} color="#a4a7ad" />
-                    </TouchableOpacity> */}
                 </View>
                 <View style={{ gap: 15, flexDirection: 'row', marginHorizontal: 15, marginTop: 10 }}>
-                    <TouchableOpacity style={{ width: '48%', borderRadius: 30, backgroundColor: '#1ce5ff', paddingVertical: 15 }}
+                    <TouchableOpacity style={{ width: '48%', borderRadius: 30, backgroundColor: '#28c5d3', paddingVertical: 15 }}
                         onPress={() => { navigation.navigate('StepTracker') }}>
                         <View style={{ alignItems: 'flex-end' }}>
                             <MaterialCommunityIcons name="run" size={60} color="white" />
                         </View>
                         <View style={{ marginHorizontal: 10, gap: 5, paddingVertical: 15 }}>
-                            <Text style={{ color: 'white', }}>Steps</Text>
-                            <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 20 }}>{steps}</Text>
-                            <Text style={{ color: 'white', }}>updated 15 min ago</Text>
+                            <Text style={{ color: 'white', }}>Workout</Text>
+                            <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 20 }}>{steps} steps</Text>
+                            <Text style={{ color: 'white', }}>today</Text>
                         </View>
                     </TouchableOpacity>
                     <TouchableOpacity style={{ width: '48%', borderRadius: 30, backgroundColor: '#e77e7e', paddingVertical: 15 }}
@@ -304,8 +409,8 @@ const Home = ({ navigation }) => {
                         </View>
                         <View style={{ marginHorizontal: 10, gap: 5, paddingVertical: 15 }}>
                             <Text style={{ color: 'white', }}>Sleep</Text>
-                            <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 20 }}>7 h 31 min</Text>
-                            <Text style={{ color: 'white', }}>updated 8 day ago</Text>
+                            <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 20 }}>{sleepData}</Text>
+                            <Text style={{ color: 'white', }}>today</Text>
                         </View>
                     </TouchableOpacity>
                     <TouchableOpacity style={{ width: '48%', borderRadius: 30, backgroundColor: '#cc5f12', paddingVertical: 15 }}
@@ -315,8 +420,8 @@ const Home = ({ navigation }) => {
                         </View>
                         <View style={{ marginHorizontal: 10, gap: 5, paddingVertical: 15 }}>
                             <Text style={{ color: 'white', }}>Nutrition</Text>
-                            <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 20 }}>{kcal} kcal</Text>
-                            <Text style={{ color: 'white', }}>updated 5 min ago</Text>
+                            <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 20 }}>{totalKcal} kcal</Text>
+                            <Text style={{ color: 'white', }}>today</Text>
                         </View>
                     </TouchableOpacity>
                 </View>
@@ -324,10 +429,10 @@ const Home = ({ navigation }) => {
                     <View style={{ width: '60%' }}>
                         <Text style={{ fontSize: 25, fontWeight: 'bold' }}>This week report</Text>
                     </View>
-                    <TouchableOpacity style={{ width: '40%', justifyContent: 'flex-end', flexDirection: 'row', alignItems: 'center' }}>
+                    {/* <TouchableOpacity style={{ width: '40%', justifyContent: 'flex-end', flexDirection: 'row', alignItems: 'center' }}>
                         <Text style={{ marginRight: 2, color: '#a4a7ad' }}>View more</Text>
                         <Entypo name="controller-play" size={18} color="#a4a7ad" />
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                 </View>
                 <View style={{ gap: 15, flexDirection: 'row', marginHorizontal: 15, marginTop: 10 }}>
                     <TouchableOpacity style={{ paddingHorizontal: 10, width: '48%', borderRadius: 10, paddingVertical: 15, borderWidth: 1, borderColor: '#f5f5f6', backgroundColor: 'white' }}>
@@ -337,18 +442,18 @@ const Home = ({ navigation }) => {
                         </View>
                         <View style={{ marginHorizontal: 5, gap: 5, paddingVertical: 15 }}>
 
-                            <Text style={{ fontWeight: 'bold', fontSize: 20 }}>697,978</Text>
+                            <Text style={{ fontWeight: 'bold', fontSize: 20 }}>{stepWeek}</Text>
 
                         </View>
                     </TouchableOpacity>
                     <TouchableOpacity style={{ paddingHorizontal: 10, width: '48%', borderRadius: 10, paddingVertical: 15, borderWidth: 1, borderColor: '#f5f5f6', backgroundColor: 'white' }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
                             <MaterialCommunityIcons name="arm-flex-outline" size={24} color="black" />
-                            <Text>Workout</Text>
+                            <Text>Loaded</Text>
                         </View>
                         <View style={{ marginHorizontal: 5, gap: 5, paddingVertical: 15 }}>
 
-                            <Text style={{ fontWeight: 'bold', fontSize: 20 }}>6h 45min</Text>
+                            <Text style={{ fontWeight: 'bold', fontSize: 20 }}>{totalKcalWeek} kcal</Text>
 
                         </View>
                     </TouchableOpacity>
@@ -372,7 +477,7 @@ const Home = ({ navigation }) => {
                         </View>
                         <View style={{ marginHorizontal: 5, gap: 5, paddingVertical: 15 }}>
 
-                            <Text style={{ fontWeight: 'bold', fontSize: 20 }}>{totalSleepTime}</Text>
+                            <Text style={{ fontWeight: 'bold', fontSize: 20 }}>{sleepWeek}</Text>
 
                         </View>
                     </TouchableOpacity>

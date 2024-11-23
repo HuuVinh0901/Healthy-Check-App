@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Platform, Modal, StyleSheet, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Platform, Modal, StyleSheet, Image,Pressable  } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { launchImageLibrary } from 'react-native-image-picker';
+import Entypo from '@expo/vector-icons/Entypo';
+import Feather from '@expo/vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 const MyAbout = ({ navigation }) => {
     const [avatar, setAvatar] = useState(null);
+    const [modalLogOut, setModalLogOut] = useState(false);
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [gender, setGender] = useState('');
@@ -33,8 +36,13 @@ const MyAbout = ({ navigation }) => {
                 setGender(parsedUser.gender);
                 setEmail(parsedUser.email);
                 setUserId(parsedUser.id)
-                const imageUrl = `http://localhost:3000${parsedUser.avatar}`;
-                setAvatar(imageUrl);
+                if (parsedUser.avatar === null) {
+                    setAvatar(null);
+                }
+                else {
+                    const imageUrl = `http://localhost:3000${parsedUser.avatar}`;
+                    setAvatar(imageUrl)
+                }
             }
         } catch (error) {
             console.error('Error fetching user data', error);
@@ -121,10 +129,10 @@ const MyAbout = ({ navigation }) => {
     const handleUploadImage = async () => {
         if (!file) {
             setModalMessage("Please choose image")
-                setSuccessModalVisible(true);
-                setTimeout(() => {
-                    setSuccessModalVisible(false);
-                }, 1000);
+            setSuccessModalVisible(true);
+            setTimeout(() => {
+                setSuccessModalVisible(false);
+            }, 1000);
             return;
         }
 
@@ -162,7 +170,17 @@ const MyAbout = ({ navigation }) => {
         }
     };
 
-
+    const handleLogout = async () => {
+        try {
+            // Xóa token và thông tin người dùng
+            await AsyncStorage.removeItem('token');
+            await AsyncStorage.removeItem('currentUser');
+            setModalVisible(false);
+            navigation.replace('Login');
+        } catch (error) {
+            console.error('Lỗi khi đăng xuất:', error);
+        }
+    };
 
 
 
@@ -202,7 +220,7 @@ const MyAbout = ({ navigation }) => {
 
                 </View>
             </View>
-            <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+            <View style={{ justifyContent: 'center', alignItems: 'center', }}>
                 <TouchableOpacity style={styles.button}
                     onPress={handleUploadImage}
                 >
@@ -230,9 +248,21 @@ const MyAbout = ({ navigation }) => {
 
             {/* Button to change password */}
             <TouchableOpacity style={styles.button} onPress={() => setModalVisible(true)}>
+                <Feather name="lock" size={20} color="white" />
                 <Text style={styles.buttonText}>Change Password</Text>
             </TouchableOpacity>
-
+            <TouchableOpacity style={{
+                marginTop: 10,
+                flexDirection: 'row', backgroundColor: '#d85454',
+                paddingVertical: 10,
+                paddingHorizontal: 20,
+                borderRadius: 10,
+                alignItems: 'center',
+                justifyContent: 'center'
+            }} onPress={()=>setModalLogOut(true)}>
+                <Entypo name="log-out" size={20} color="white" />
+                <Text style={{ marginLeft: 5, fontSize: 16, color: 'white' }}>Log out</Text>
+            </TouchableOpacity>
             {/* Modal for password change */}
             <Modal
                 visible={modalVisible}
@@ -292,21 +322,34 @@ const MyAbout = ({ navigation }) => {
                     </View>
                 </View>
             </Modal>
-            {/* <Modal
-                transparent={true}
-                visible={isModalVisibleErorr}
+            <Modal
                 animationType="slide"
-                onRequestClose={closeModal}
+                transparent={true}
+                visible={modalLogOut}
+                onRequestClose={() => setModalLogOut(false)} // Đóng modal khi nhấn nút Back
             >
                 <View style={styles.modalOverlay}>
-                    <View style={styles.modalContainer}>
-                        <Text style={styles.modalMessage}>{modalMessage}</Text>
-                        <TouchableOpacity style={styles.closeModalButton} onPress={closeModal}>
-                            <Text style={styles.closeModalText}>Close</Text>
-                        </TouchableOpacity>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalText}>Are you sure want to log out?</Text>
+
+                        <View style={styles.buttonContainer}>
+                            <Pressable
+                                style={[styles.button, styles.buttonCancel]}
+                                onPress={() => setModalLogOut(false)}
+                            >
+                                <Text style={styles.textStyle}>Cancel</Text>
+                            </Pressable>
+
+                            <Pressable
+                                style={[styles.button, styles.buttonConfirm]}
+                                onPress={handleLogout}
+                            >
+                                <Text style={styles.textStyle}>Yes</Text>
+                            </Pressable>
+                        </View>
                     </View>
                 </View>
-            </Modal> */}
+            </Modal>
         </View>
     );
 };
@@ -334,16 +377,19 @@ const styles = StyleSheet.create({
         textAlign: 'left',
     },
     button: {
-        marginTop: 30,
+        flexDirection: 'row',
+        marginTop: 20,
         backgroundColor: '#00bdd6',
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 10,
         alignItems: 'center',
+        justifyContent: 'center'
     },
     buttonText: {
         fontSize: 16,
         color: '#fff',
+        marginLeft: 5
     },
     modalOverlay: {
         flex: 1,
@@ -408,7 +454,33 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-
+    buttonCancel: {
+        backgroundColor: '#9b9393',
+    },
+    buttonConfirm: {
+        backgroundColor: '#d85454',
+    },
+    textStyle: {
+        color: 'white',
+        fontWeight: 'bold',
+    },
+    buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+    },
+    modalContent: {
+        width: '80%',
+        backgroundColor: 'white',
+        borderRadius: 10,
+        padding: 20,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+    },
 });
 
 export default MyAbout;

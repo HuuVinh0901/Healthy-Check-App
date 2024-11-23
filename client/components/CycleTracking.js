@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView, Modal, TextInput } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
@@ -12,17 +13,16 @@ const CycleTrackingScreen = ({ navigation }) => {
   const [user, setUser] = useState(null);
   const [cycleData, setCycleData] = useState([]);
   const [daysUntilNextPeriod, setDaysUntilNextPeriod] = useState(null);
-  useEffect(() => {
-    getUserData();
-    const today = new Date();
-    setSelectedDay(today.getDate().toString().padStart(2, '0'));
-  }, []);
-
-  useEffect(() => {
-    if (cycleData.length > 0) {
-      calculateDaysUntilNextPeriod();
-    }
-  }, [cycleData]);
+  useFocusEffect(
+    React.useCallback(() => {
+      getUserData(); // Gọi lại hàm lấy dữ liệu khi màn hình được focus
+      const today = new Date();
+      setSelectedDay(today.getDate().toString().padStart(2, '0')); // Cập nhật ngày hôm nay
+      if (cycleData.length > 0) {
+        calculateDaysUntilNextPeriod(); // Cập nhật ngày đến chu kỳ tiếp theo
+      }
+    }, [cycleData]) // Mỗi khi cycleData thay đổi thì tính lại ngày
+  );
 
   const getUserData = async () => {
     try {
@@ -41,22 +41,28 @@ const CycleTrackingScreen = ({ navigation }) => {
     try {
       const response = await fetch(`http://localhost:3000/api/cycle/${userId}`);
       const data = await response.json();
-      setCycleData(data || []);
+
+      // Đảm bảo data là mảng
+      setCycleData(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Lỗi khi gọi API:', error);
+      setCycleData([]); // Gán cycleData thành mảng rỗng khi có lỗi
     }
   };
 
+
   const calculateDaysUntilNextPeriod = () => {
-    const lastCycle = cycleData[cycleData.length - 1]; // Lấy chu kỳ gần nhất
-    if (lastCycle) {
+    if (cycleData.length > 0) {
+      const lastCycle = cycleData[cycleData.length - 1]; // Lấy chu kỳ gần nhất
       const lastEndDate = moment(lastCycle.endDate, 'YYYY-MM-DD');
       const nextCycleStartDate = lastEndDate.add(lastCycle.cycleLength, 'days');
       const diffDays = nextCycleStartDate.diff(moment(currentDate), 'days');
       setDaysUntilNextPeriod(diffDays);
-      
+    } else {
+      setDaysUntilNextPeriod(0); // Không có dữ liệu chu kỳ, gán giá trị là null
     }
   };
+
 
   const generateCalendar = () => {
     const days = [];
@@ -118,11 +124,11 @@ const CycleTrackingScreen = ({ navigation }) => {
         <Text style={styles.periodText}>Period in</Text>
         <Text style={styles.daysText}>{daysUntilNextPeriod}</Text>
         <Text style={styles.chanceText}>Low chance of getting pregnant</Text>
-        <TouchableOpacity style={styles.editButton} 
-        onPress={() => navigation.navigate('InforCycle')}>
+        <TouchableOpacity style={styles.editButton}
+          onPress={() => navigation.navigate('InforCycle')}>
           <Text style={styles.editButtonText}>Edit period dates</Text>
         </TouchableOpacity>
-        
+
       </View>
 
 
@@ -166,16 +172,7 @@ const CycleTrackingScreen = ({ navigation }) => {
           <Text style={{ fontWeight: 'bold', fontSize: 18 }}>Craving sweets on your period? Here's why & what to do about it</Text>
         </View>
       </TouchableOpacity>
-      {/* <DatePickerModal
-        locale="en"
-        mode="single"
-        visible={showEditPicker}
-        onDismiss={() => setShowEditPicker(false)}
-        date={editDate}
-        // onConfirm={handleStartDateConfirm}
-        saveLabel="Choose"
-        label="Choose end date cycle lastest"
-      /> */}
+
     </ScrollView>
   );
 };

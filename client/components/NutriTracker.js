@@ -59,10 +59,6 @@ const NutritionTracker = ({ navigation }) => {
             console.error('Lỗi khi gọi API:', error);
         }
     };
-    
-
-
-
     const radiusFat = 35;
     const radiusProtein = 45;
     const radiusCarbs = 55;

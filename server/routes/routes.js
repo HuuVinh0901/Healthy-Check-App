@@ -79,7 +79,7 @@ router.get('/sleeps/:userId/', sleepController.getSleep);
 // Routes cho Nutrition
 router.post('/nutritions', nutritionController.createNutrition);
 router.get('/nutritions/:userId/:date', nutritionController.getNutrition);
-
+router.get('/nutritions/:userId', nutritionController.getAllAllNutri);
 router.post('/login', authController.login);
 
 router.post('/cycle', cycleController.addCycle)
